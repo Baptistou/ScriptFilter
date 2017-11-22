@@ -1,0 +1,288 @@
+/* -------------------- Global definitions -------------------- */
+
+* {
+	box-sizing: border-box;
+    font-family: "Segoe UI";
+	font-size: 100%;
+}
+
+html {
+	font-size: 1px;
+}
+
+@media screen and (orientation: landscape) {
+	html {font-size: 0.15vh;}
+}
+
+@media screen and (orientation: portrait) {
+	html {font-size: 0.22vw;}
+}
+
+body {
+	margin: 0;
+	font-size: 18rem;
+}
+
+h1 {
+	margin: 10rem 0;
+	font-size: 30rem;
+}
+
+h2 {
+	margin: 10rem 0;
+	font-size: 20rem;
+}
+
+p {
+	margin: 10rem 0;
+}
+
+.top {
+	vertical-align: top !important;
+}
+
+.middle {
+	vertical-align: middle !important;
+}
+
+.bottom {
+	vertical-align: bottom !important;
+}
+
+.left {
+	text-align: left !important;
+}
+
+.center {
+	text-align: center !important;
+}
+
+.right {
+	text-align: right !important;
+}
+
+.hidden {
+	display: none !important;
+}
+
+/* -------------------- Components -------------------- */
+
+.button {
+	display: inline-block;
+	height: 34rem;
+	line-height: 32rem;
+	min-width: 100rem;
+	margin: 0;
+	padding: 0 10rem 0 10rem;
+	border: 1rem solid #000042;
+	font-size: 18rem;
+	text-decoration: none;
+	text-align: center;
+	background-color: #000042;
+	color: white;
+	cursor: pointer;
+	/* Fix bug in touch screen */
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.button:hover {
+	border-color: #0042AA;
+	background-color: #0042AA;
+	transition: 0.2s;
+}
+
+.button[disabled] {
+	border-color: #5B6C7D;
+	background-color: #5B6C7D;
+	color: #E0E0E0;
+}
+
+/* Fix CSS bug in Firefox */
+.button::-moz-focus-inner {
+    padding: 0;
+	border: 0;
+}
+
+select.menu {
+	display: inline-block;
+	height: 30rem;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+.inputfield {
+	display: inline-block;
+	width: 100%;
+	margin: 5rem 0 5rem 0;
+	padding: 5rem;
+	border: 0;
+	font-size: 18rem;
+	background-color: #E8E8E8;
+}
+
+input.inputfield {
+	height: 34rem;
+}
+
+textarea.inputfield {
+	height: 100rem;
+}
+
+.inputfield:enabled:hover, .inputfield:enabled:focus {
+	padding: 4rem;
+	border: 1rem solid #AAAAAA;
+	background-color: #FFFFFF;
+}
+
+.inputbutton {
+	display: block;
+	width: 100%;
+}
+
+.inputbutton .inputfield {
+	float: left;
+	width: 80%;
+	margin: 0;
+}
+
+.inputbutton .inputfield+.button {
+	float: right;
+	width: 20%;
+}
+
+/* -------------------- Content -------------------- */
+
+content {
+	display: block;
+	max-width: 800rem;
+	margin: auto;
+	padding: 0 10rem 50rem 10rem;
+}
+
+.setting-block {
+	margin: 20rem 0 20rem 0;
+	border-top: 1px solid #E0E0E0;
+}
+
+.setting-block input:disabled+label {
+	color: #888888;
+}
+
+.setting-block .inputbutton {
+	width: 500rem;
+	margin: auto;
+}
+
+#readme {
+	float: right;
+	font-size: 18rem;
+	font-weight: normal;
+	color: #888888;
+}
+
+ul.optionlist-v {
+	display: block;
+	width: 500rem;
+	margin: 10rem auto 10rem auto;
+	padding: 0;
+	list-style: none;
+}
+
+ul.optionlist-v>li {
+	height: 30rem;
+	line-height: 30rem;
+	padding-left: 10rem;
+}
+
+ul.optionlist-v>li:hover {
+	background-color: #E0E0E0;
+}
+
+ul.optionlist-v>li select.menu {
+	display: block;
+	float: right;
+	width: 100rem;
+}
+
+ul.optionlist-h {
+	display: block;
+	margin: 10rem 0 10rem 0;
+	padding: 0;
+}
+
+ul.optionlist-h>li {
+	display: inline-block;
+	padding: 5rem;
+	margin: 0 5rem 0 5rem;
+}
+
+ul.optionlist-h>li:hover {
+	background-color: #E0E0E0;
+}
+
+table.urllist {
+	display: table;
+	table-layout: fixed;
+	width: 500rem;
+	margin: auto;
+	border: 2px groove #F0F0F0;
+	border-collapse: collapse;
+}
+
+table.urllist>tr:first-child {
+	border-top: 0;
+}
+
+table.urllist>tr {
+	border-top: 1rem solid #E0E0E0;
+}
+
+table.urllist>tr>td:nth-child(1) {
+	padding: 5rem;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+table.urllist>tr>td:nth-child(2) {
+	width: 65rem;
+	padding: 0 8rem 0 8rem;
+	text-align: right;
+}
+
+.icon-false {
+	display: inline-block;
+	margin: 0 2rem 0 2rem;
+	line-height: 100%;
+	font-size: 24rem;
+	vertical-align: top;
+	color: #DD2222;
+	cursor: pointer;
+}
+
+.icon-false:hover {
+	color: #AA0000;
+	transition: 0.2s;
+}
+
+.icon-false::before {
+	content: "\2716";
+}
+
+/* -------------------- Footer -------------------- */
+
+footer {
+	display: block;
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	padding: 10rem;
+	text-align: center;
+	background-color: white;
+	box-shadow: 0 0 5rem rgba(0,0,0,0.175);
+}

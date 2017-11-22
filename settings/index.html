@@ -1,0 +1,186 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+	<head>
+        <!-- META INFORMATIONS -->
+        <meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>ScriptFilter Settings</title>
+		
+		<!-- FAVICON & CSS -->
+		<link rel="icon" type="image/x-icon" href="/images/icon.ico">
+		<link rel="stylesheet" type="text/css" href="custom.css">
+		
+		<!-- JAVASCRIPT -->
+		<script type="text/javascript" src="/functions.js"></script>
+		<script type="text/javascript" src="script.js"></script>
+    </head>
+	
+    <body>
+		<!-- HEADER -->
+		<header>
+			<h1 class="center">
+				<img class="middle" id="icon" src="/images/icon48.png">
+				<span class="middle">ScriptFilter</span>
+			</h1>
+		</header>
+		
+		<!-- CONTENT -->
+		<content>
+			<!-- ABOUT -->
+			<div class="setting-block">
+				<h2>About <a class="link" id="readme" href="/README.txt">More Info</a></h2>
+				<p>ScriptFilter version <span id="version"></span> by <span id="author"></span>.</p>
+				<p>
+					If you like this add-on or have some ideas to improve it, please send a comment on
+					<a class="link" href="https://addons.mozilla.org/fr/firefox/addon/scriptfilteraddon">AMO</a>.<br>
+					If you encountered any issue, please report it on
+					<a class="link" href="https://github.com/Baptistou/ScriptFilter">GitHub</a>.
+				</p>
+				<p>Thank you for downloading ScriptFilter.</p>
+			</div>
+			
+			<!-- CONTENT SECURITY POLICY -->
+			<div class="setting-block">
+				<h2>Content Security Policy</h2>
+				<p>
+					Enable, restrict or disable the following ressources from a website when you click on the action button
+					by applying Content Security Policy (CSP).
+					You will need to reload tabs in order to see CSP modifications.
+				</p>
+				<ul class="optionlist-v">
+					<li>
+						<label>All</label>
+						<select class="menu" id="csp-all">
+							<option value="0" class="hidden">Custom</option>
+							<option value="1">Enable</option>
+							<option value="2">Restrict</option>
+							<option value="3">Disable</option>
+						</select>
+					</li>
+					<li>
+						<label>Images</label>
+						<select class="menu" id="csp-img">
+							<option value="1">Enable</option>
+							<option value="2">Restrict</option>
+							<option value="3">Disable</option>
+						</select>
+					</li>
+					<li>
+						<label>Medias (Audio+Video)</label>
+						<select class="menu" id="csp-media">
+							<option value="1">Enable</option>
+							<option value="2">Restrict</option>
+							<option value="3">Disable</option>
+						</select>
+					</li>
+					<li>
+						<label>Popups</label>
+						<select class="menu" id="csp-popup">
+							<option value="1">Enable</option>
+							<option value="2">Disable</option>
+						</select>
+					</li>
+					<li>
+						<label>Scripts</label>
+						<select class="menu" id="csp-script">
+							<option value="1">Enable</option>
+							<option value="2">Restrict</option>
+							<option value="3">Disable</option>
+						</select>
+					</li>
+					<li>
+						<label>Stylesheets</label>
+						<select class="menu" id="csp-style">
+							<option value="1">Enable</option>
+							<option value="2">Restrict</option>
+							<option value="3">Disable</option>
+						</select>
+					</li>
+					<li>
+						<label>Sub-frames</label>
+						<select class="menu" id="csp-frame">
+							<option value="1">Enable</option>
+							<option value="2">Restrict</option>
+							<option value="3">Disable</option>
+						</select>
+					</li>
+					<li>
+						<label>Sub-requests XHR</label>
+						<select class="menu" id="csp-connect">
+							<option value="1">Enable</option>
+							<option value="2">Restrict</option>
+							<option value="3">Disable</option>
+						</select>
+					</li>
+				</ul>
+				<p>
+					Enable : Ressources are loaded as normal.<br>
+					Restrict : Only self-hosted ressources are enabled, external ressources are blocked.<br>
+					Disable : All ressources are blocked.
+				</p>
+			</div>
+			
+			<!-- OPTIONS -->
+			<div class="setting-block">
+				<h2>Options</h2>
+				<p>When I click on the action button, apply Content Security Policy to :</p>
+				<ul class="optionlist-h">
+					<li>
+						<input type="radio" name="cspapply" id="cspapply1" value="1">
+						<label for="cspapply1">All open tabs</label>
+					</li>
+					<li>
+						<input type="radio" name="cspapply" id="cspapply2" value="2">
+						<label for="cspapply2">Current tab</label>
+					</li>
+					<li>
+						<input type="radio" name="cspapply" id="cspapply3" value="3">
+						<label for="cspapply3">Current domain</label>
+					</li>
+				</ul>
+				<p>When I switch CSP ON to current domain, add automatically the domain url to blacklist :</p>
+				<ul class="optionlist-h">
+					<li>
+						<input type="radio" name="urlsadd" id="urlsadd1" value="true">
+						<label for="urlsadd1">Enable</label>
+					</li>
+					<li>
+						<input type="radio" name="urlsadd" id="urlsadd2" value="false">
+						<label for="urlsadd2">Disable</label>
+					</li>
+				</ul>
+				<p>When I switch CSP OFF to current domain, remove automatically the domain url from blacklist :</p>
+				<ul class="optionlist-h">
+					<li>
+						<input type="radio" name="urlsdel" id="urlsdel1" value="true">
+						<label for="urlsdel1">Enable</label>
+					</li>
+					<li>
+						<input type="radio" name="urlsdel" id="urlsdel2" value="false">
+						<label for="urlsdel2">Disable</label>
+					</li>
+				</ul>
+			</div>
+			
+			<!-- BLOCKED URLS -->
+			<div class="setting-block">
+				<h2>Domain Blacklist</h2>
+				<p>
+					If CSP is set to current domain, CSP is applied if the domain url of a visited page matches the following list.
+					You can add domain urls with wildcards "*" and "?" such as "www.ex?mple.*".
+				</p>
+				<div class="inputbutton">
+					<input type="text" class="inputfield" id="addurl" placeholder="Block a domain">
+					<button class="button" id="addbtn">Add</button>
+				</div>
+				<table class="urllist" id="urllist"></table>
+			</div>
+		</content>
+		
+		<!-- FOOTER -->
+		<footer>
+			<button class="button" id="reload">Reload Tabs</button>
+			<button class="button" id="close">Close</button>
+		</footer>
+	</body>
+</html>
