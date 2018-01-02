@@ -6,6 +6,29 @@ var FIREFOX = !!browser;
 var browser = browser || chrome;
 var ANDROID = !browser.windows;
 
+//Opens a new tab
+function opentab(tab,callback = function(){}){
+	switch(tab.index){
+	case "next" :
+		var winid = !ANDROID && (tab.windowId || browser.windows.WINDOW_ID_CURRENT);
+		var currenttab = (winid)?{active: true, windowId: winid}:{active: true};
+		browser.tabs.query(currenttab,function(tabs){
+			tab.index = tabs[0].index+1;
+			browser.tabs.create(tab,callback);
+		});
+	break;
+	case "begin" :
+		tab.index = 0;
+		browser.tabs.create(tab,callback);
+	break;
+	case "end" :
+		tab.index = 1000000;
+		browser.tabs.create(tab,callback);
+	break;
+	default : browser.tabs.create(tab,callback);
+	break;}
+}
+
 //Focuses specified tab
 function focustab(tab){
 	if(!ANDROID) browser.windows.update(tab.windowId,{focused: true});
@@ -23,6 +46,22 @@ function closetab(tab){
 	else browser.tabs.remove(tab.id);
 }
 
+//Internationalization
+function geti18ndata(obj){
+	return browser.i18n.getMessage(
+		(obj.key)?"@"+obj.key:
+		(obj.msg)?obj.msg.replaceAll(" ","_"):
+		obj.replaceAll(" ","_")
+	) || obj.msg || obj;
+}
+
+function seti18ndata(item){
+	var data = item.getAttribute("data-i18n") || item.getAttribute("data");
+	if(item.placeholder) item.placeholder = geti18ndata({key: data, msg: item.placeholder});
+	if(item.textContent) item.textContent = geti18ndata({key: data, msg: item.textContent});
+	if(item.title) item.title = geti18ndata({key: data, msg: item.title});
+}
+
 /* -------------------- Prototypes -------------------- */
 
 //Returns true if string contains str
@@ -31,7 +70,7 @@ String.prototype.contains = function(str){
 };
 
 //Returns number of occurrences of str
-String.prototype.occurrence = function(str){
+String.prototype.count = function(str){
 	var count=0, index=0;
 	while(index = this.indexOf(str,index)+1) count++;
 	return count;
@@ -52,16 +91,19 @@ String.prototype.removeAll = function(str){
 	return this.replaceAll(str,"");
 };
 
+//Returns first element of array
+Array.prototype.first = function(){
+	return this[0];
+};
+
+//Returns last element of array
+Array.prototype.last = function(){
+	return this[this.length-1];
+};
+
 //Returns true if array contains val
 Array.prototype.contains = function(val){
 	return (this.indexOf(val)>=0);
-};
-
-//Returns number of occurrences of val
-Array.prototype.occurrence = function(val){
-	var count=0, index=0;
-	while(index = this.indexOf(val,index)+1) count++;
-	return count;
 };
 
 //Inserts value into array at specified index
@@ -69,10 +111,19 @@ Array.prototype.insert = function(index,val){
 	this.splice(index,0,val);
 };
 
+//Returns number of elements that fulfill condition
+Array.prototype.count = function(callback){
+	var count=0;
+	for(var i=0; i<this.length; i++){
+		if(callback(this[i],i,this)) count++;}
+	return count;
+};
+
 //Removes first element that fulfills condition
 Array.prototype.remove = function(callback){
-	var index = this.findIndex(callback);
-	return (index>=0)?this.splice(index,1)[0]:null;
+	for(var i=0; i<this.length; i++){
+		if(callback(this[i],i,this)) return this.splice(i,1)[0];}
+	return undefined;
 };
 
 //Removes all elements that fulfill condition

@@ -24,163 +24,207 @@
 			</h1>
 		</header>
 		
+		<!-- NAVIGATION BAR -->
+		<nav>
+			<a class="active" id="nav-settings" data-i18n>Settings</a>
+			<a id="nav-blacklist" data-i18n>Domains</a>
+		</nav>
+		
 		<!-- CONTENT -->
 		<content>
-			<!-- ABOUT -->
-			<div class="setting-block">
-				<h2>About <a class="link" id="readme" href="/README.txt">More Info</a></h2>
-				<p>ScriptFilter version <span id="version"></span> by <span id="author"></span>.</p>
-				<p>
-					If you like this add-on or have some ideas to improve it, please send a comment on
-					<a class="link" href="https://addons.mozilla.org/fr/firefox/addon/scriptfilteraddon">AMO</a>.<br>
-					If you encountered any issue, please report it on
-					<a class="link" href="https://github.com/Baptistou/ScriptFilter">GitHub</a>.
-				</p>
-				<p>Thank you for downloading ScriptFilter.</p>
-			</div>
-			
-			<!-- CONTENT SECURITY POLICY -->
-			<div class="setting-block">
-				<h2>Content Security Policy</h2>
-				<p>
-					Enable, restrict or disable the following ressources from a website when you click on the action button
-					by applying Content Security Policy (CSP).
-					You will need to reload tabs in order to see CSP modifications.
-				</p>
-				<ul class="optionlist-v">
-					<li>
-						<label>All</label>
-						<select class="menu" id="csp-all">
-							<option value="0" class="hidden">Custom</option>
-							<option value="1">Enable</option>
-							<option value="2">Restrict</option>
-							<option value="3">Disable</option>
-						</select>
-					</li>
-					<li>
-						<label>Images</label>
-						<select class="menu" id="csp-img">
-							<option value="1">Enable</option>
-							<option value="2">Restrict</option>
-							<option value="3">Disable</option>
-						</select>
-					</li>
-					<li>
-						<label>Medias (Audio+Video)</label>
-						<select class="menu" id="csp-media">
-							<option value="1">Enable</option>
-							<option value="2">Restrict</option>
-							<option value="3">Disable</option>
-						</select>
-					</li>
-					<li>
-						<label>Popups</label>
-						<select class="menu" id="csp-popup">
-							<option value="1">Enable</option>
-							<option value="2">Disable</option>
-						</select>
-					</li>
-					<li>
-						<label>Scripts</label>
-						<select class="menu" id="csp-script">
-							<option value="1">Enable</option>
-							<option value="2">Restrict</option>
-							<option value="3">Disable</option>
-						</select>
-					</li>
-					<li>
-						<label>Stylesheets</label>
-						<select class="menu" id="csp-style">
-							<option value="1">Enable</option>
-							<option value="2">Restrict</option>
-							<option value="3">Disable</option>
-						</select>
-					</li>
-					<li>
-						<label>Sub-frames</label>
-						<select class="menu" id="csp-frame">
-							<option value="1">Enable</option>
-							<option value="2">Restrict</option>
-							<option value="3">Disable</option>
-						</select>
-					</li>
-					<li>
-						<label>Sub-requests XHR</label>
-						<select class="menu" id="csp-connect">
-							<option value="1">Enable</option>
-							<option value="2">Restrict</option>
-							<option value="3">Disable</option>
-						</select>
-					</li>
-				</ul>
-				<p>
-					Enable : Ressources are loaded as normal.<br>
-					Restrict : Only self-hosted ressources are enabled, external ressources are blocked.<br>
-					Disable : All ressources are blocked.
-				</p>
-			</div>
-			
-			<!-- OPTIONS -->
-			<div class="setting-block">
-				<h2>Options</h2>
-				<p>When I click on the action button, apply Content Security Policy to :</p>
-				<ul class="optionlist-h">
-					<li>
-						<input type="radio" name="cspapply" id="cspapply1" value="1">
-						<label for="cspapply1">All open tabs</label>
-					</li>
-					<li>
-						<input type="radio" name="cspapply" id="cspapply2" value="2">
-						<label for="cspapply2">Current tab</label>
-					</li>
-					<li>
-						<input type="radio" name="cspapply" id="cspapply3" value="3">
-						<label for="cspapply3">Current domain</label>
-					</li>
-				</ul>
-				<p>When I switch CSP ON to current domain, add automatically the domain url to blacklist :</p>
-				<ul class="optionlist-h">
-					<li>
-						<input type="radio" name="urlsadd" id="urlsadd1" value="true">
-						<label for="urlsadd1">Enable</label>
-					</li>
-					<li>
-						<input type="radio" name="urlsadd" id="urlsadd2" value="false">
-						<label for="urlsadd2">Disable</label>
-					</li>
-				</ul>
-				<p>When I switch CSP OFF to current domain, remove automatically the domain url from blacklist :</p>
-				<ul class="optionlist-h">
-					<li>
-						<input type="radio" name="urlsdel" id="urlsdel1" value="true">
-						<label for="urlsdel1">Enable</label>
-					</li>
-					<li>
-						<input type="radio" name="urlsdel" id="urlsdel2" value="false">
-						<label for="urlsdel2">Disable</label>
-					</li>
-				</ul>
-			</div>
-			
-			<!-- BLOCKED URLS -->
-			<div class="setting-block">
-				<h2>Domain Blacklist</h2>
-				<p>
-					If CSP is set to current domain, CSP is applied if the domain url of a visited page matches the following list.
-					You can add domain urls with wildcards "*" and "?" such as "www.ex?mple.*".
-				</p>
-				<div class="inputbutton">
-					<input type="text" class="inputfield" id="addurl" placeholder="Block a domain">
-					<button class="button" id="addbtn">Add</button>
+			<!-- SETTINGS -->
+			<section id="settings">
+				<!-- ABOUT -->
+				<div class="block">
+					<h2><i18n>About</i18n> <a class="link" href="/README.txt" title="More Info" data-i18n><span class="icon-help"></span></a></h2>
+					<p>ScriptFilter <i18n>version</i18n> <span id="version"></span> <i18n>by</i18n> <span id="author"></span>.</p>
+					<p>
+						<span id="description"></span><br>
+						<i18n data="about_review">If you like this add-on or have some ideas to improve it, please send a comment on</i18n>
+						<a class="link" href="https://addons.mozilla.org/firefox/addon/scriptfilteraddon">AMO</a>.
+						<i18n data="about_github">If you encountered any issue, please report it on</i18n>
+						<a class="link" href="https://github.com/Baptistou/ScriptFilter">GitHub</a>.
+						<i18n data="about_thanks">Thank you for downloading ScriptFilter.</i18n>
+					</p>
 				</div>
-				<table class="urllist" id="urllist"></table>
-			</div>
+				
+				<!-- CONTENT SECURITY POLICY -->
+				<div class="block">
+					<h2 data-i18n>Content Security Policy</h2>
+					<p data-i18n="csp_text">
+						Enable, restrict or disable the following resources from a website when
+						you click on the action button by applying Content Security Policy (CSP).
+						You will need to reload tabs in order to see CSP modifications.
+					</p>
+					<ul class="optionlist-v">
+						<li>
+							<span class="icon-circle"></span>
+							<label data-i18n>All</label>
+							<select class="menu" id="csp-all">
+								<option value="0" class="hidden" data-i18n>Custom</option>
+								<option value="1" data-i18n>Enable</option>
+								<option value="2" data-i18n>Restrict</option>
+								<option value="3" data-i18n>Disable</option>
+							</select>
+						</li>
+						<li>
+							<span class="icon-circle"></span>
+							<label data-i18n>Images</label>
+							<select class="menu" id="csp-img">
+								<option value="1" data-i18n>Enable</option>
+								<option value="2" data-i18n>Restrict</option>
+								<option value="3" data-i18n>Disable</option>
+							</select>
+						</li>
+						<li>
+							<span class="icon-circle"></span>
+							<label data-i18n="medias">Medias (Audio+Video)</label>
+							<select class="menu" id="csp-media">
+								<option value="1" data-i18n>Enable</option>
+								<option value="2" data-i18n>Restrict</option>
+								<option value="3" data-i18n>Disable</option>
+							</select>
+						</li>
+						<li>
+							<span class="icon-circle"></span>
+							<label data-i18n>Popups</label>
+							<select class="menu" id="csp-popup">
+								<option value="1" data-i18n>Enable</option>
+								<option value="2" data-i18n>Disable</option>
+							</select>
+						</li>
+						<li>
+							<span class="icon-circle"></span>
+							<label data-i18n>Scripts</label>
+							<select class="menu" id="csp-script">
+								<option value="1" data-i18n>Enable</option>
+								<option value="2" data-i18n>Restrict</option>
+								<option value="3" data-i18n>Disable</option>
+							</select>
+						</li>
+						<li>
+							<span class="icon-circle"></span>
+							<label data-i18n>Stylesheets CSS</label>
+							<select class="menu" id="csp-style">
+								<option value="1" data-i18n>Enable</option>
+								<option value="2" data-i18n>Restrict</option>
+								<option value="3" data-i18n>Disable</option>
+							</select>
+						</li>
+						<li>
+							<span class="icon-circle"></span>
+							<label data-i18n>Subframes</label>
+							<select class="menu" id="csp-frame">
+								<option value="1" data-i18n>Enable</option>
+								<option value="2" data-i18n>Restrict</option>
+								<option value="3" data-i18n>Disable</option>
+							</select>
+						</li>
+						<li>
+							<span class="icon-circle"></span>
+							<label data-i18n>Subrequests XHR</label>
+							<select class="menu" id="csp-connect">
+								<option value="1" data-i18n>Enable</option>
+								<option value="2" data-i18n>Restrict</option>
+								<option value="3" data-i18n>Disable</option>
+							</select>
+						</li>
+					</ul>
+					<p>
+						<i18n data="csp_enable">Enable : Resources are loaded as normal.</i18n><br>
+						<i18n data="csp_restrict">Restrict : External resources and unsafe inline resources are blocked.</i18n><br>
+						<i18n data="csp_disable">Disable : All resources are blocked.</i18n>
+					</p>
+				</div>
+				
+				<!-- MODE -->
+				<div class="block">
+					<h2 data-i18n>Apply Mode</h2>
+					<p data-i18n="mode_text1">When I click on the action button, apply Content Security Policy to :</p>
+					<ul class="optionlist-h">
+						<li>
+							<input type="radio" name="mode" id="mode1" value="1">
+							<label for="mode1" data-i18n>All open tabs</label>
+						</li>
+						<li>
+							<input type="radio" name="mode" id="mode2" value="2">
+							<label for="mode2" data-i18n>Current tab</label>
+						</li>
+						<li>
+							<input type="radio" name="mode" id="mode3" value="3">
+							<label for="mode3" data-i18n>Current domain</label>
+						</li>
+					</ul>
+					<p>
+						<i18n data="mode_text2">The domain blacklist is activated if current domain is selected.</i18n>
+						<a class="link" id="link-blacklist" data-i18n>Manage Domains</a>.
+					</p>
+				</div>
+				
+				<!-- OPTIONS -->
+				<div class="block">
+					<h2 data-i18n>Options</h2>
+					<p data-i18n="options_contextmenu">Add ScriptFilter to the browser context menu :</p>
+					<ul class="optionlist-h">
+						<li>
+							<input type="radio" name="contextmenu" id="contextmenu1" value="true">
+							<label for="contextmenu1" data-i18n>Enable</label>
+						</li>
+						<li>
+							<input type="radio" name="contextmenu" id="contextmenu2" value="false">
+							<label for="contextmenu2" data-i18n>Disable</label>
+						</li>
+					</ul>
+					<p data-i18n="options_urlsadd">When I switch CSP ON to current domain, add automatically the domain url to blacklist :</p>
+					<ul class="optionlist-h">
+						<li>
+							<input type="radio" name="urlsadd" id="urlsadd1" value="true">
+							<label for="urlsadd1" data-i18n>Enable</label>
+						</li>
+						<li>
+							<input type="radio" name="urlsadd" id="urlsadd2" value="false">
+							<label for="urlsadd2" data-i18n>Disable</label>
+						</li>
+					</ul>
+					<p data-i18n="options_urlsdel">When I switch CSP OFF to current domain, remove automatically the domain url from blacklist :</p>
+					<ul class="optionlist-h">
+						<li>
+							<input type="radio" name="urlsdel" id="urlsdel1" value="true">
+							<label for="urlsdel1" data-i18n>Enable</label>
+						</li>
+						<li>
+							<input type="radio" name="urlsdel" id="urlsdel2" value="false">
+							<label for="urlsdel2" data-i18n>Disable</label>
+						</li>
+					</ul>
+				</div>
+			</section>
+			
+			<!-- DOMAIN BLACKLIST -->
+			<section class="hidden" id="blacklist">
+				<div class="block">
+					<h2><i18n>Domain Blacklist</i18n> (<span id="nburls">0</span>)</h2>
+					<p data-i18n="blacklist_text">
+						If "Current domain" is selected, then CSP is applied if the domain url of a visited page matches the domain blacklist.
+						You can add domain urls with wildcards "*" and "?" such as "www.ex?mple.*".
+					</p>
+					<p class="inputbutton">
+						<input type="text" class="inputfield" id="addurl" placeholder="Block a domain" data-i18n>
+						<button class="button" id="addbtn" data-i18n>Add</button>
+					</p>
+					<table class="urllist" id="urllist"></table>
+				</div>
+				<p class="msgbox error hidden" id="msg-error" data-i18n="msg_error">The domain url contains unexpected characters !</p>
+				<p class="msgbox error hidden" id="msg-exists" data-i18n="msg_exists">The domain url already exists in the blacklist !</p>
+				<p class="msgbox success hidden" id="msg-add"><span id="nbadd">0</span> <i18n data="msg_add">domain(s) added !</i18n></p>
+				<p class="msgbox warning hidden" id="msg-del"><span id="nbdel">0</span> <i18n data="msg_del">domain(s) deleted !</i18n></p>
+			</section>
 		</content>
 		
 		<!-- FOOTER -->
 		<footer>
-			<button class="button" id="reload">Reload Tabs</button>
-			<button class="button" id="close">Close</button>
+			<button class="button" id="reload" data-i18n>Reload Tabs</button>
+			<button class="button" id="close" data-i18n>Close</button>
 		</footer>
 	</body>
 </html>

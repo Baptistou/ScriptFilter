@@ -1,13 +1,15 @@
 {
 	"manifest_version": 2,
 	"name": "ScriptFilter",
-	"version": "1.0",
+	"version": "2.0",
 	"author": "Baptiste Thémine",
-	
-	"description": "Blocks scripts and ressources from a website with Content Security Policy.",
+	"homepage_url": "https://github.com/Baptistou/ScriptFilter",
+	"description": "__MSG_@manifest_description__",
+	"default_locale": "en",
 	
 	"permissions": [
 		"<all_urls>",
+		"contextMenus",
 		"storage",
 		"tabs",
 		"webRequest",
