@@ -1,4 +1,4 @@
-﻿ScriptFilter version 1.0 by Baptiste Thémine
+﻿ScriptFilter version 2.1 by Baptiste Thémine
 
 Blocks scripts and resources from a website with Content Security Policy.
 
@@ -9,7 +9,7 @@ It is also possible to create a black list in order to block resources when you 
 
 --------------------------------------------------------------------------------
 
-ScriptFilter version 1.0 par Baptiste Thémine
+ScriptFilter version 2.1 par Baptiste Thémine
 
 Bloque les scripts et les ressources d'un site web avec Content Security Policy.
 
@@ -20,10 +20,15 @@ Il est également possible de créer une liste noire pour bloquer les ressources
 
 --------------------------------------------------------------------------------
 
-Language support : English, French, Italian, Spannish.
+Language support : English, French, Italian, Spanish.
 Browser support : Firefox 52+, Firefox Android 59+, Chrome 42+, Opera 33+.
 
 Updates :
+Updates :
+* version 2.1 (04/01/2018)
+- Fix compatibility issue with Chromium PDF Viewer Plugin not working with CSP sandbox.
+- Fix compatibility issue with Firefox not opening Google links with CSP sandbox.
+
 * version 2.0 (02/01/2018)
 - Fix issue with CSP not applying on Settings page if its tab url was modified.
 - Fix issue with duplicate matching rules in blacklist which could prevent CSP to switch OFF.

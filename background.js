@@ -107,7 +107,7 @@ function CSPManager(){
 		if(!this.csp.all)
 			return csptostr("img-src",this.csp.img)
 			+ csptostr("media-src",this.csp.media)
-			+ ((this.csp.popup==1)?"":"sandbox allow-forms allow-same-origin allow-scripts;")
+			+ ((this.csp.popup==1)?"":CSP_SANDBOX_NOPOPUPS)
 			+ csptostr("script-src",this.csp.script)
 			+ csptostr("style-src",this.csp.style)
 			+ csptostr("child-src",this.csp.frame)	//CSP 2-
@@ -321,13 +321,15 @@ browser.tabs.onUpdated.addListener(function(tabid,info,tab){
 
 //Blocking web requests with Content Security Policy
 //Note: Chromium PDF Viewer Plugin not working with CSP sandbox
+var CSP_SANDBOX_NOPOPUPS = "sandbox allow-forms allow-orientation-lock allow-pointer-lock"
+	+ "allow-presentation allow-same-origin allow-scripts allow-top-navigation;";
 browser.webRequest.onHeadersReceived.addListener(
 	function(info){
 		if(!cspman.istrusted({id: info.tabId, url: info.url})){
 			var CSP = cspman.getcsp();
 			if(CHROMIUM && CSP.contains("sandbox") && info.responseHeaders.find(
 					val => (val.name=="Content-Type" && val.value=="application/pdf")
-				)) CSP = CSP.remove(/sandbox[^;]*;/);
+				)) CSP = CSP.remove(CSP_SANDBOX_NOPOPUPS);
 			if(CSP) info.responseHeaders.push({name: "Content-Security-Policy", value: CSP});}
 		return {responseHeaders: info.responseHeaders};
 	},
