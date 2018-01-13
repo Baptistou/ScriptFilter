@@ -1,67 +1,3 @@
-/* -------------------- WebExtensions -------------------- */
-
-//Browser compatibility
-var CHROMIUM = !browser;
-var FIREFOX = !!browser;
-var browser = browser || chrome;
-var ANDROID = !browser.windows;
-
-//Opens a new tab
-function opentab(tab,callback = function(){}){
-	switch(tab.index){
-	case "next" :
-		var winid = !ANDROID && (tab.windowId || browser.windows.WINDOW_ID_CURRENT);
-		var currenttab = (winid)?{active: true, windowId: winid}:{active: true};
-		browser.tabs.query(currenttab,function(tabs){
-			tab.index = tabs[0].index+1;
-			browser.tabs.create(tab,callback);
-		});
-	break;
-	case "begin" :
-		tab.index = 0;
-		browser.tabs.create(tab,callback);
-	break;
-	case "end" :
-		tab.index = 1000000;
-		browser.tabs.create(tab,callback);
-	break;
-	default : browser.tabs.create(tab,callback);
-	break;}
-}
-
-//Focuses specified tab
-function focustab(tab){
-	if(!ANDROID) browser.windows.update(tab.windowId,{focused: true});
-	browser.tabs.update(tab.id,{active: true});
-}
-
-//Closes specified tab and its window
-//Note: about:config --> browser.tabs.closeWindowWithLastTab
-function closetab(tab){
-	if(!ANDROID)
-		browser.tabs.query({windowId: tab.windowId},function(tabs){
-			if(tabs.length==1 && tabs[0].id==tab.id) browser.windows.remove(tab.windowId);
-			else browser.tabs.remove(tab.id);
-		});
-	else browser.tabs.remove(tab.id);
-}
-
-//Internationalization
-function geti18ndata(obj){
-	return browser.i18n.getMessage(
-		(obj.key)?"@"+obj.key:
-		(obj.msg)?obj.msg.replaceAll(" ","_"):
-		obj.replaceAll(" ","_")
-	) || obj.msg || obj;
-}
-
-function seti18ndata(item){
-	var data = item.getAttribute("data-i18n") || item.getAttribute("data");
-	if(item.placeholder) item.placeholder = geti18ndata({key: data, msg: item.placeholder});
-	if(item.textContent) item.textContent = geti18ndata({key: data, msg: item.textContent});
-	if(item.title) item.title = geti18ndata({key: data, msg: item.title});
-}
-
 /* -------------------- Prototypes -------------------- */
 
 //Returns true if string contains str
@@ -123,7 +59,7 @@ Array.prototype.count = function(callback){
 Array.prototype.remove = function(callback){
 	for(var i=0; i<this.length; i++){
 		if(callback(this[i],i,this)) return this.splice(i,1)[0];}
-	return undefined;
+	return null;
 };
 
 //Removes all elements that fulfill condition
@@ -134,6 +70,16 @@ Array.prototype.removeAll = function(callback){
 	return list;
 };
 
+/* -------------------- Polyfills -------------------- */
+
+//ForEach support for DOM element list
+if(window.HTMLCollection && !HTMLCollection.prototype.forEach)
+    HTMLCollection.prototype.forEach = Array.prototype.forEach;
+
+//ForEach support for DOM node list
+if(window.NodeList && !NodeList.prototype.forEach)
+    NodeList.prototype.forEach = Array.prototype.forEach;
+
 /* -------------------- Functions -------------------- */
 
 //Returns true if string contains only whitespaces
@@ -141,63 +87,101 @@ function isempty(str){
 	return (!str || !(/\S/.test(str)));
 }
 
-//Adds class name
-function addClass(target,str){
-	if(!target.className.contains(str)) target.className = (target.className+" "+str).trim();
+//Returns true if DOM element is hidden
+function ishidden(element){
+	//return (window.getComputedStyle(element).display=="none");
+	return element.className.contains("hidden");
 }
 
-//Removes class name
-function removeClass(target,str){
-	if(target.className.contains(str)) target.className = target.className.replace(str,"").trim();
+//Adds class name of DOM element
+function addClass(element,str){
+	if(!element.className.contains(str)) element.className = (element.className+" "+str).trim();
 }
 
-//Toggles class name
-function toggleClass(target,str){
-	if(!target.className.contains(str)) addClass(target,str);
-	else removeClass(target,str);
+//Adds class name of all DOM elements from list
+function addClassAll(list,str){
+	list.forEach(function(element){addClass(element,str)});
 }
 
-//Returns true if element is hidden
-function isHiddenElement(target){
-	return target.className.contains("hidden");
+//Removes class name of DOM element
+function removeClass(element,str){
+	element.className = element.className.removeAll(str).trim();
 }
 
-//Shows element
-function showElement(target){
-	removeClass(target,"hidden");
+//Removes class name of all DOM elements from list
+function removeClassAll(list,str){
+	list.forEach(function(element){removeClass(element,str)});
 }
 
-//Shows element list
-function showElements(list){
-	list.forEach(function(val){removeClass(val,"hidden")});
+//Toggles class name of DOM element
+function toggleClass(element,str){
+	if(!element.className.contains(str)) element.className = (element.className+" "+str).trim();
+	else element.className = element.className.removeAll(str).trim();
 }
 
-//Hides element
-function hideElement(target){
-	addClass(target,"hidden");
+//Toggles class name of all DOM elements from list
+function toggleClassAll(list,str){
+	list.forEach(function(element){toggleClass(element,str)});
 }
 
-//Hides element list
-function hideElements(list){
-	list.forEach(function(val){addClass(val,"hidden")});
+//Shows DOM element
+function showElement(element){
+	if(element) removeClass(element,"hidden");
 }
 
-//Toggles element
-function toggleElement(target){
-	toggleClass(target,"hidden");
+//Shows all DOM elements from list
+function showElementAll(list){
+	list.forEach(showElement);
 }
 
-//Toggles element list
-function toggleElements(list){
-	list.forEach(function(val){toggleClass(val,"hidden")});
+//Hides DOM element
+function hideElement(element){
+	if(element) addClass(element,"hidden");
 }
 
-//Removes element
-function removeElement(target){
-	if(target) target.parentNode.removeChild(target);
+//Hides all DOM elements from list
+function hideElementAll(list){
+	list.forEach(hideElement);
 }
 
-//Removes element list
-function removeElements(list){
-	list.forEach(function(val){val.parentNode.removeChild(val)});
+//Toggles DOM element
+function toggleElement(element){
+	if(element) toggleClass(element,"hidden");
+}
+
+//Toggles all DOM elements from list
+function toggleElementAll(list){
+	list.forEach(toggleElement);
+}
+
+//Removes DOM element
+function removeElement(element){
+	if(element) element.parentElement.removeChild(element);
+}
+
+//Removes all DOM elements from list
+function removeElementAll(list){
+	list.forEach(removeElement);
+}
+
+//Imports text file
+function importfile(obj){
+	Array.prototype.forEach.call(obj.files,function(file){
+		var fileext = file.name.substring(file.name.lastIndexOf("."));
+		if(!obj.accept || obj.accept.contains(file.type) || obj.accept.contains(fileext)){
+			var reader = new FileReader();
+			if(obj.success) reader.onload = function(){obj.success(this.result)};
+			if(obj.error) reader.onerror = function(event){obj.error(event.target.error)};
+			reader.readAsText(file);}
+		else if(obj.error) obj.error();
+	});
+}
+
+//Exports UTF-8 BOM text file
+function exportfile(obj){
+	var link = document.createElement("a");
+	link.href = "data:"+obj.filetype+";charset=UTF-8,\uFEFF"+encodeURI(obj.data);
+	link.download = obj.filename;
+	document.body.appendChild(link);
+	link.click();
 }

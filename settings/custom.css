@@ -110,6 +110,18 @@ input:disabled+label {
 	border: 0;
 }
 
+.button.btn-yes:hover {
+	border-color: #00AA00;
+	background-color: #00AA00;
+	transition: 0.2s;
+}
+
+.button.btn-no:hover {
+	border-color: #AA0000;
+	background-color: #AA0000;
+	transition: 0.2s;
+}
+
 select.menu {
 	display: inline-block;
 	height: 30rem;
@@ -142,20 +154,41 @@ textarea.inputfield {
 	background-color: #FFFFFF;
 }
 
-.inputbutton {
-	display: block;
+input.inputfile {
+	display: inline-block;
+	height: 34rem;
 	width: 100%;
 }
 
-.inputbutton .inputfield {
+/* Fix CSS bug in Chrome and Opera */
+input.inputfile::-webkit-file-upload-button {
+	height: 100%;
+}
+
+.block-button {
+	display: table;
+	line-height: 34rem;
+	width: 100%;
+	margin: 15rem 0 15rem 0;
+}
+
+.block-button>:first-child {
 	float: left;
 	width: calc(100% - 100rem);
 	margin: 0;
 }
 
-.inputbutton .inputfield+.button {
-	float: right;
+.block-button.alt>:first-child {
+	width: calc(100% - 205rem);
+}
+
+.block-button>.button {
+	float: left;
 	width: 100rem;
+}
+
+.block-button.alt>:last-child {
+	margin-left: 5rem;
 }
 
 /* -------------------- Navigation bar -------------------- */
@@ -168,18 +201,18 @@ nav {
 	padding: 0 10rem 0 10rem;
 }
 
-nav a {
+nav a.link {
 	padding: 5rem;
 	color: #888888;
 	text-decoration: none;
 	cursor: pointer;
 }
 
-nav a:hover {
+nav a.link:hover {
 	background-color: #E0E0E0;
 }
 
-nav a.active {
+nav a.link.active {
 	color: #0042AA;
 	text-decoration: underline;
 }
@@ -197,11 +230,6 @@ content {
 	display: block;
 	margin: 20rem 0 20rem 0;
 	border-top: 1px solid #E0E0E0;
-}
-
-.link {
-	text-decoration: underline;
-	cursor: pointer;
 }
 
 h2 .link {
@@ -292,8 +320,7 @@ ul.optionlist-h>li:hover {
 
 /* -------------------- Domain Blacklist -------------------- */
 
-#blacklist .inputbutton {
-	display: table;
+#blacklist .block-button {
 	max-width: 500rem;
 	margin: 15rem auto 15rem auto;
 }
@@ -348,6 +375,20 @@ table.urllist>tr>td:nth-child(2) {
 	content: "\2716";
 }
 
+/* -------------------- Footer -------------------- */
+
+footer {
+	display: block;
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	padding: 10rem;
+	text-align: center;
+	background-color: white;
+	box-shadow: 0 0 5rem rgba(0,0,0,0.175);
+}
+
 .msgbox {
 	display: block;
 	position: fixed;
@@ -380,18 +421,4 @@ table.urllist>tr>td:nth-child(2) {
 @keyframes fadein {
 	from{opacity: 0;}
 	to{opacity: 0.9;}
-}
-
-/* -------------------- Footer -------------------- */
-
-footer {
-	display: block;
-	position: fixed;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	padding: 10rem;
-	text-align: center;
-	background-color: white;
-	box-shadow: 0 0 5rem rgba(0,0,0,0.175);
 }

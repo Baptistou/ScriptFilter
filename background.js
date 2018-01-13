@@ -1,42 +1,5 @@
 /* -------------------- Classes -------------------- */
 
-function PortConnect(){
-	//Variables
-	this.data = [];
-	var self = this;
-	var count = 1;
-	
-	//Public methods
-	this.connect = function(obj){
-		var id = count++;
-		this.data.push({
-			id: id,
-			port: obj.port,
-			msgpost: obj.msgpost,
-			disconnect: obj.disconnect
-		});
-		if(obj.msgget) obj.port.onMessage.addListener(obj.msgget);
-		obj.port.onDisconnect.addListener(function(){
-			if(obj.disconnect) obj.disconnect();
-			self.data.remove(val => (val.id==id));
-		});
-	};
-	
-	this.send = function(list,message = null){
-		this.data.removeAll(function(val){
-			try{
-				if(list.contains(val.port.name)){
-					if(message) val.port.postMessage(message);
-					else if(val.msgpost) val.port.postMessage(val.msgpost());
-					else val.port.postMessage();}
-				return false;}
-			catch(error){
-				if(val.disconnect) val.disconnect();
-				return true;}
-		});
-	};
-}
-
 function CSPManager(){
 	this.csp = {};
 	this.mode = 1;
@@ -142,16 +105,31 @@ function CSPManager(){
 	
 	//Adds url to blacklist
 	this.addurl = function(url){
-		if(!url.match(/[\s+^=!:${}()|\[\]\/\\]/) && !this.urls.contains(url)){
+		if(url.match(REG_DOMAINURL) && !this.urls.contains(url)){
 			this.urls.push(url);
 			if(this.mode==3) untrusts.push(url);
 			browser.storage.local.set({urls: this.urls});}
 	};
 	
-	//Deletes url from blacklist
+	//Removes url from blacklist
 	this.delurl = function(url){
 		this.urls.remove(val => (val==url));
 		if(this.mode==3) untrusts.removeAll(val => (val==url));
+		browser.storage.local.set({urls: this.urls});
+	};
+	
+	//Imports blacklist
+	this.importurls = function(urls){
+		urls.removeAll(val => (!val.match(REG_DOMAINURL) || this.urls.contains(val)));
+		this.urls = this.urls.concat(urls);
+		if(this.mode==3) untrusts = untrusts.concat(urls);
+		browser.storage.local.set({urls: this.urls});
+	};
+	
+	//Clears blacklist
+	this.clear = function(){
+		this.urls = [];
+		if(this.mode==3) untrusts.removeAll(val => !Number.isInteger(val));
 		browser.storage.local.set({urls: this.urls});
 	};
 	
@@ -243,7 +221,7 @@ function CSPManager(){
 	};
 	
 	//Updates browserAction button
-	//Note: No Firefox Android support for setIcon and setBadge
+	//Note: No Firefox Android support for setIcon() and setBadgeText()
 	this.updatebutton = function(){
 		var actionbtn = {
 			true: {title: "CSP OFF", icon: "icon-cspoff.png"},
@@ -255,9 +233,51 @@ function CSPManager(){
 	};
 }
 
+/* -------------------- Functions -------------------- */
+
+//Internationalization
+var i18ncontextmenu = {
+	page: {
+		true: geti18ndata({key: "contextmenu_page1", msg: "Switch CSP ON"}),
+		false: geti18ndata({key: "contextmenu_page2", msg: "Switch CSP OFF"})
+	},
+	link: geti18ndata({key: "contextmenu_link", msg: "Open link in new tab with CSP ON"})
+};
+
+//Creates context menu items
+function createcontextmenu(){
+	browser.contextMenus.create({
+		id: "page",
+		title: i18ncontextmenu["page"][cspman.trust],
+		contexts: ["page"]
+	});
+	browser.contextMenus.create({
+		id: "link",
+		title: i18ncontextmenu["link"],
+		contexts: ["link"],
+		enabled: (cspman.mode!=1)
+	});
+};
+
+//Updates context menu item
+function updatecontextmenu(menuid){
+	switch(menuid){
+	case "page" : browser.contextMenus.update("page",{title: i18ncontextmenu["page"][cspman.trust]});
+	break;
+	case "link" : browser.contextMenus.update("link",{enabled: (cspman.mode!=1)});
+	break;}
+};
+
+//Removes context menu items
+function removecontextmenu(){
+	browser.contextMenus.remove("page");
+	browser.contextMenus.remove("link");
+};
+
 /* -------------------- Main Process -------------------- */
 
 //Global variables
+var REG_DOMAINURL = /^[\.\*\?a-z0-9_-]+$/;
 var portcon = new PortConnect();
 var cspman = new CSPManager();
 
@@ -268,9 +288,9 @@ browser.browserAction.onClicked.addListener(function(tab){
 });
 
 //OptionsPage browserAction context menu
-//Note: Firefox doesn't have context menu to OptionsPage.
-//Note: No Firefox 52- support for ContextType.BROWSER_ACTION.
-//Note: openOptionsPage() issue on Firefox and Opera + no Firefox Android support.
+//Note: Firefox doesn't have browserAction context menu to open OptionsPage
+//Note: No Firefox 52- support for ContextType.BROWSER_ACTION
+//Note: No Firefox Android 56- support + Firefox and Opera issue with openOptionsPage()
 if(FIREFOX && !ANDROID && browser.contextMenus.ContextType.BROWSER_ACTION)
 	browser.contextMenus.create({
 		id: "option",
@@ -320,7 +340,7 @@ browser.tabs.onUpdated.addListener(function(tabid,info,tab){
 });
 
 //Blocking web requests with Content Security Policy
-//Note: Chromium PDF Viewer Plugin not working with CSP sandbox
+//Note: Chromium PDF Viewer Plugin issue with CSP sandbox
 var CSP_SANDBOX_NOPOPUPS = "sandbox allow-forms allow-orientation-lock allow-pointer-lock"
 	+ "allow-presentation allow-same-origin allow-scripts allow-top-navigation;";
 browser.webRequest.onHeadersReceived.addListener(
@@ -337,8 +357,7 @@ browser.webRequest.onHeadersReceived.addListener(
 	["blocking","responseHeaders"]
 );
 
-//Script communication with content scripts
-//Note: Port.onDisconnect not triggered on window close on Firefox
+//Port communication between scripts
 browser.runtime.onConnect.addListener(function(port){
 	cspman.settingsid = port.sender.tab.id;
 	portcon.connect({
@@ -361,6 +380,10 @@ browser.runtime.onConnect.addListener(function(port){
 			break;
 			case "delurl" : cspman.delurl(msg.url);
 			break
+			case "import" : cspman.importurls(msg.urls);
+			break
+			case "clear" : cspman.clear();
+			break
 			case "reload" : cspman.reload();
 			break;;}
 			portcon.send(["settings"]);
@@ -369,44 +392,3 @@ browser.runtime.onConnect.addListener(function(port){
 	});
 	portcon.send(["settings"]);
 });
-
-/* -------------------- Functions -------------------- */
-
-//Internationalization
-var i18ncontextmenu = {
-	page: {
-		true: geti18ndata({key: "contextmenu_page1", msg: "Switch CSP ON"}),
-		false: geti18ndata({key: "contextmenu_page2", msg: "Switch CSP OFF"})
-	},
-	link: geti18ndata({key: "contextmenu_link", msg: "Open link in new tab with CSP ON"})
-};
-
-//Creates context menu items
-function createcontextmenu(){
-	browser.contextMenus.create({
-		id: "page",
-		title: i18ncontextmenu["page"][cspman.trust],
-		contexts: ["page"]
-	});
-	browser.contextMenus.create({
-		id: "link",
-		title: i18ncontextmenu["link"],
-		contexts: ["link"],
-		enabled: (cspman.mode!=1)
-	});
-};
-
-//Updates context menu item
-function updatecontextmenu(menuid){
-	switch(menuid){
-	case "page" : browser.contextMenus.update("page",{title: i18ncontextmenu["page"][cspman.trust]});
-	break;
-	case "link" : browser.contextMenus.update("link",{enabled: (cspman.mode!=1)});
-	break;}
-};
-
-//Removes context menu items
-function removecontextmenu(){
-	browser.contextMenus.remove("page");
-	browser.contextMenus.remove("link");
-};

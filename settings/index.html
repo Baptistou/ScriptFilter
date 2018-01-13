@@ -12,6 +12,7 @@
 		
 		<!-- JAVASCRIPT -->
 		<script type="text/javascript" src="/functions.js"></script>
+		<script type="text/javascript" src="/webext.js"></script>
 		<script type="text/javascript" src="script.js"></script>
     </head>
 	
@@ -26,8 +27,9 @@
 		
 		<!-- NAVIGATION BAR -->
 		<nav>
-			<a class="active" id="nav-settings" data-i18n>Settings</a>
-			<a id="nav-blacklist" data-i18n>Domains</a>
+			<a class="link active" href="#settings" data-i18n>Settings</a>
+			<a class="link" href="#blacklist" data-i18n>Domains</a>
+			<a class="link" href="#file" data-i18n>File</a>
 		</nav>
 		
 		<!-- CONTENT -->
@@ -157,24 +159,13 @@
 					</ul>
 					<p>
 						<i18n data="mode_text2">The domain blacklist is activated if current domain is selected.</i18n>
-						<a class="link" id="link-blacklist" data-i18n>Manage Domains</a>.
+						<a class="link nav" href="#blacklist" data-i18n>Manage Domains</a>.
 					</p>
 				</div>
 				
 				<!-- OPTIONS -->
 				<div class="block">
 					<h2 data-i18n>Options</h2>
-					<p data-i18n="options_contextmenu">Add ScriptFilter to the browser context menu :</p>
-					<ul class="optionlist-h">
-						<li>
-							<input type="radio" name="contextmenu" id="contextmenu1" value="true">
-							<label for="contextmenu1" data-i18n>Enable</label>
-						</li>
-						<li>
-							<input type="radio" name="contextmenu" id="contextmenu2" value="false">
-							<label for="contextmenu2" data-i18n>Disable</label>
-						</li>
-					</ul>
 					<p data-i18n="options_urlsadd">When I switch CSP ON to current domain, add automatically the domain url to blacklist :</p>
 					<ul class="optionlist-h">
 						<li>
@@ -197,6 +188,17 @@
 							<label for="urlsdel2" data-i18n>Disable</label>
 						</li>
 					</ul>
+					<p data-i18n="options_contextmenu">Add ScriptFilter to the browser context menu :</p>
+					<ul class="optionlist-h">
+						<li>
+							<input type="radio" name="contextmenu" id="contextmenu1" value="true">
+							<label for="contextmenu1" data-i18n>Enable</label>
+						</li>
+						<li>
+							<input type="radio" name="contextmenu" id="contextmenu2" value="false">
+							<label for="contextmenu2" data-i18n>Disable</label>
+						</li>
+					</ul>
 				</div>
 			</section>
 			
@@ -208,16 +210,42 @@
 						If "Current domain" is selected, then CSP is applied if the domain url of a visited page matches the domain blacklist.
 						You can add domain urls with wildcards "*" and "?" such as "www.ex?mple.*".
 					</p>
-					<p class="inputbutton">
-						<input type="text" class="inputfield" id="addurl" placeholder="Block a domain" data-i18n>
-						<button class="button" id="addbtn" data-i18n>Add</button>
-					</p>
+					<form class="block-button" id="addurl">
+						<input type="text" class="inputfield" placeholder="Block a domain" data-i18n>
+						<button type="submit" class="button" data-i18n>Add</button>
+					</form>
 					<table class="urllist" id="urllist"></table>
 				</div>
-				<p class="msgbox error hidden" id="msg-error" data-i18n="msg_error">The domain url contains unexpected characters !</p>
-				<p class="msgbox error hidden" id="msg-exists" data-i18n="msg_exists">The domain url already exists in the blacklist !</p>
-				<p class="msgbox success hidden" id="msg-add"><span id="nbadd">0</span> <i18n data="msg_add">domain(s) added !</i18n></p>
-				<p class="msgbox warning hidden" id="msg-del"><span id="nbdel">0</span> <i18n data="msg_del">domain(s) deleted !</i18n></p>
+			</section>
+			
+			<!-- FILE -->
+			<section class="hidden" id="file">
+				<div class="block">
+					<h2 data-i18n="file_import">Import domain blacklist</h2>
+					<form class="block-button" id="file-import">
+						<input type="file" class="inputfile" accept=".csv,.txt,text/csv,text/plain">
+						<button type="submit" class="button" data-i18n>Import</button>
+					</form>
+				</div>
+				<div class="block">
+					<h2 data-i18n="file_export1">Export domain blacklist</h2>
+					<form class="block-button" id="file-export">
+						<i18n data="file_export2">Download the domain blacklist as text file.</i18n>
+						<button type="submit" class="button" data-i18n>Export</button>
+					</form>
+				</div>
+				<div class="block">
+					<h2 data-i18n="file_clear1">Clear domain blacklist</h2>
+					<p class="block-button" id="clear-text">
+						<i18n data="file_clear2">Removes all domain urls from the blacklist.</i18n>
+						<button type="button" class="button" data-i18n>Clear</button>
+					</p>
+					<p class="block-button alt hidden" id="clear-confirm">
+						<i18n data="msg_confirm">This operation is irreversible. Continue ?</i18n>
+						<button type="button" class="button btn-yes" data-i18n>Yes</button>
+						<button type="button" class="button btn-no" data-i18n>No</button>
+					</p>
+				</div>
 			</section>
 		</content>
 		
@@ -225,6 +253,12 @@
 		<footer>
 			<button class="button" id="reload" data-i18n>Reload Tabs</button>
 			<button class="button" id="close" data-i18n>Close</button>
+			<p class="msgbox error hidden" id="msg-chars" data-i18n="msg_chars">The domain url contains unexpected characters !</p>
+			<p class="msgbox error hidden" id="msg-exists" data-i18n="msg_exists">The domain url already exists in the blacklist !</p>
+			<p class="msgbox error hidden" id="msg-import" data-i18n="msg_import">Import failed ! Please select a .txt or .csv file !</p>
+			<p class="msgbox error hidden" id="msg-file" data-i18n="msg_file">The imported file contains unexpected characters !</p>
+			<p class="msgbox success hidden" id="msg-add"><span id="nbadd">0</span> <i18n data="msg_add">domain(s) added !</i18n></p>
+			<p class="msgbox warning hidden" id="msg-del"><span id="nbdel">0</span> <i18n data="msg_del">domain(s) deleted !</i18n></p>
 		</footer>
 	</body>
 </html>
