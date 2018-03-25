@@ -2,7 +2,7 @@
 
 * {
 	box-sizing: border-box;
-    font-family: "Segoe UI";
+	font-family: "Segoe UI";
 	font-size: 100%;
 }
 
@@ -10,17 +10,18 @@ html {
 	font-size: 1px;
 }
 
-@media screen and (orientation: landscape) {
-	html {font-size: 0.15vh;}
+@media screen and (orientation: landscape) and (max-width: 1000px) {
+	html { font-size: 0.1vw; }
 }
 
-@media screen and (orientation: portrait) {
-	html {font-size: 0.22vw;}
+@media screen and (orientation: portrait) and (max-width: 500px) {
+	html { font-size: 0.2vw; }
 }
 
 body {
 	margin: 0;
 	font-size: 18rem;
+	background-color: white;
 }
 
 h1 {
@@ -98,7 +99,7 @@ input:disabled+label {
 	transition: 0.2s;
 }
 
-.button[disabled] {
+.button:disabled {
 	border-color: #5B6C7D;
 	background-color: #5B6C7D;
 	color: #E0E0E0;
@@ -106,52 +107,51 @@ input:disabled+label {
 
 /* Fix CSS bug in Firefox */
 .button::-moz-focus-inner {
-    padding: 0;
+	padding: 0;
 	border: 0;
 }
 
-.button.btn-yes:hover {
+.button.green:hover {
 	border-color: #00AA00;
 	background-color: #00AA00;
 	transition: 0.2s;
 }
 
-.button.btn-no:hover {
+.button.red:hover {
 	border-color: #AA0000;
 	background-color: #AA0000;
 	transition: 0.2s;
-}
-
-select.menu {
-	display: inline-block;
-	height: 30rem;
-	width: 100%;
-	margin: 0;
-	padding: 0;
 }
 
 .inputfield {
 	display: inline-block;
 	width: 100%;
 	margin: 5rem 0 5rem 0;
-	padding: 5rem;
-	border: 0;
+	border: 1rem solid #E8E8E8;
 	font-size: 18rem;
 	background-color: #E8E8E8;
+	color: black;
 }
 
 input.inputfield {
 	height: 34rem;
+	padding: 0 5rem 0 5rem;
 }
 
 textarea.inputfield {
 	height: 100rem;
+	padding: 5rem;
 }
 
-.inputfield:enabled:hover, .inputfield:enabled:focus {
-	padding: 4rem;
-	border: 1rem solid #AAAAAA;
+.inputfield:hover, .inputfield:focus {
+	border-color: #AAAAAA;
 	background-color: #FFFFFF;
+}
+
+.inputfield:disabled, .inputfield[readonly] {
+	border-color: #E8E8E8;
+	background-color: #E8E8E8;
+	cursor: default;
 }
 
 input.inputfile {
@@ -163,6 +163,14 @@ input.inputfile {
 /* Fix CSS bug in Chrome and Opera */
 input.inputfile::-webkit-file-upload-button {
 	height: 100%;
+}
+
+select.menu {
+	display: inline-block;
+	height: 30rem;
+	width: 100%;
+	margin: 0;
+	padding: 0;
 }
 
 .block-button {
@@ -178,13 +186,13 @@ input.inputfile::-webkit-file-upload-button {
 	margin: 0;
 }
 
-.block-button.alt>:first-child {
-	width: calc(100% - 205rem);
-}
-
 .block-button>.button {
 	float: left;
 	width: 100rem;
+}
+
+.block-button.alt>:first-child {
+	width: calc(100% - 205rem);
 }
 
 .block-button.alt>:last-child {
@@ -197,22 +205,22 @@ nav {
 	display: block;
 	max-width: 800rem;
 	margin: auto;
-	font-size: 22rem;
+	font-size: 24rem;
 	padding: 0 10rem 0 10rem;
 }
 
-nav a.link {
+nav .link {
 	padding: 5rem;
 	color: #888888;
 	text-decoration: none;
 	cursor: pointer;
 }
 
-nav a.link:hover {
+nav .link:hover {
 	background-color: #E0E0E0;
 }
 
-nav a.link.active {
+nav .link.active {
 	color: #0042AA;
 	text-decoration: underline;
 }
@@ -238,94 +246,53 @@ h2 .link {
 
 /* -------------------- Settings -------------------- */
 
-ul.optionlist-v {
+ul.list-options-v {
 	display: block;
-	max-width: 500rem;
+	max-width: 600rem;
 	margin: 10rem auto 10rem auto;
 	padding: 0;
 	list-style: none;
 }
 
-ul.optionlist-v>li {
+ul.list-options-v>li {
 	height: 30rem;
 	line-height: 30rem;
 }
 
-ul.optionlist-v>li:hover {
+ul.list-options-v>li:hover {
 	background-color: #E0E0E0;
 }
 
-ul.optionlist-v>li select.menu {
+ul.list-options-v>li select.menu {
 	display: block;
 	float: right;
 	width: 120rem;
 }
 
-ul.optionlist-h {
+ul.list-options-h {
 	display: block;
 	margin: 10rem 0 10rem 0;
 	padding: 0;
 }
 
-ul.optionlist-h>li {
+ul.list-options-h>li {
 	display: inline-block;
 	padding: 5rem;
 	margin: 0 5rem 0 5rem;
 }
 
-ul.optionlist-h>li:hover {
+ul.list-options-h>li:hover {
 	background-color: #E0E0E0;
 }
 
-.icon-help {
-	display: inline-block;
-	line-height: 25rem;
-	height: 25rem;
-    width: 25rem;
-    border-radius: 50%;
-    text-align: center;
-    background-color: #CCCCCC;
-    color: white;
-}
-
-.icon-help:hover {
-	background-color: #BBBBBB;
-	transition: 0.2s;
-}
-
-.icon-help::before {
-	content: "\003F";
-}
-
-.icon-circle {
-	display: inline-block;
-	height: 15rem;
-	width: 15rem;
-	margin: 0 5rem 0 10rem;
-	border-radius: 50%;
-	background-color: lightgray;
-}
-
-.icon-circle.green {
-	background-color: green;
-}
-
-.icon-circle.orange {
-	background-color: orange;
-}
-
-.icon-circle.red {
-	background-color: red;
-}
-
-/* -------------------- Domain Blacklist -------------------- */
+/* -------------------- Domain blacklist -------------------- */
 
 #blacklist .block-button {
 	max-width: 500rem;
 	margin: 15rem auto 15rem auto;
 }
 
-table.urllist {
+table.list-urls {
 	display: table;
 	table-layout: fixed;
 	width: 100%;
@@ -335,44 +302,25 @@ table.urllist {
 	border-collapse: collapse;
 }
 
-table.urllist>tr:first-child {
+table.list-urls>tr:first-child {
 	border-top: 0;
 }
 
-table.urllist>tr {
+table.list-urls>tr {
 	border-top: 1rem solid #E0E0E0;
 }
 
-table.urllist>tr>td:nth-child(1) {
+table.list-urls>tr>td:nth-child(1) {
 	padding: 5rem;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
 
-table.urllist>tr>td:nth-child(2) {
+table.list-urls>tr>td:nth-child(2) {
 	width: 65rem;
 	padding: 0 8rem 0 8rem;
 	text-align: right;
-}
-
-.icon-false {
-	display: inline-block;
-	margin: 0 2rem 0 2rem;
-	height: 35rem;
-	font-size: 24rem;
-	vertical-align: top;
-	color: #DD2222;
-	cursor: pointer;
-}
-
-.icon-false:hover {
-	color: #AA0000;
-	transition: 0.2s;
-}
-
-.icon-false::before {
-	content: "\2716";
 }
 
 /* -------------------- Footer -------------------- */
@@ -419,6 +367,70 @@ footer {
 }
 
 @keyframes fadein {
-	from{opacity: 0;}
-	to{opacity: 0.9;}
+	from { opacity: 0; }
+	to { opacity: 0.9; }
+}
+
+/* -------------------- Icons -------------------- */
+
+.icon-help {
+	display: inline-block;
+	line-height: 25rem;
+	height: 25rem;
+	width: 25rem;
+	border-radius: 50%;
+	text-align: center;
+	background-color: #CCCCCC;
+	color: white;
+}
+
+.icon-help:hover {
+	background-color: #BBBBBB;
+	transition: 0.2s;
+}
+
+.icon-help::before {
+	content: "\003F";
+}
+
+.icon-circle {
+	display: inline-block;
+	height: 15rem;
+	width: 15rem;
+	margin: 0 5rem 0 10rem;
+	border-radius: 50%;
+	background-color: lightgray;
+}
+
+.icon-circle.green {
+	background-color: green;
+}
+
+.icon-circle.orange {
+	background-color: orange;
+}
+
+.icon-circle.red {
+	background-color: red;
+}
+
+.icon-false {
+	display: inline-block;
+	margin: 0 2rem 0 2rem;
+	height: 35rem;
+	line-height: 35rem;
+	font-size: 25rem;
+	font-weight: bold;
+	vertical-align: top;
+	color: #DD2222;
+	cursor: pointer;
+}
+
+.icon-false:hover {
+	color: #AA0000;
+	transition: 0.2s;
+}
+
+.icon-false::before {
+	content: "\2715";
 }

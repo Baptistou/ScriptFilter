@@ -42,11 +42,6 @@ Array.prototype.contains = function(val){
 	return (this.indexOf(val)>=0);
 };
 
-//Inserts value into array at specified index
-Array.prototype.insert = function(index,val){
-	this.splice(index,0,val);
-};
-
 //Returns number of elements that fulfill condition
 Array.prototype.count = function(callback){
 	var count=0;
@@ -55,11 +50,103 @@ Array.prototype.count = function(callback){
 	return count;
 };
 
+//Inserts value into array at specified index
+Array.prototype.insert = function(index,val){
+	this.splice(index,0,val);
+};
+
+//Flattens array
+Array.prototype.flatten = function(){
+	return this.reduce(function(acc,val){ return acc.concat(val) },[]);
+};
+
+//Maps and flattens array
+Array.prototype.flatMap = function(callback){
+	return this.reduce(function(acc,val,index,self){ return acc.concat(callback(val,index,self)) },[]);
+};
+
+//Groups array values by key from specified callback
+Array.prototype.groupBy = function(callback){
+	return this
+		.reduce(function(acc,val){
+			var key = callback(val);
+			var group = acc.find(function(val){ return (callback(val[0])===key) });
+			if(group===undefined) acc.push([val]);
+			else group.push(val);
+			return acc;
+		},[])
+		.map(function(val){ 
+			return (val.length>1)? val : val[0];
+		});
+};
+
+//Removes duplicate values from array
+Array.prototype.unique = function(callback){
+	return this.reduce(
+		(callback)?
+		function(acc,val1){
+			if(!acc.some(function(val2){ return callback(val1,val2) })) acc.push(val1);
+			return acc;
+		}:
+		function(acc,val){
+			if(!acc.contains(val)) acc.push(val);
+			return acc;
+		},
+		[]
+	);
+};
+
+//Merges two arrays
+Array.prototype.merge = function(list,callback){
+	return this.concat(list).reduce(
+		(callback)?
+		function(acc,val1){
+			var index = acc.findIndex(function(val2){ return callback(val1,val2) });
+			if(index<0) acc.push(val1);
+			else acc[index] = val1;
+			return acc;
+		}:
+		function(acc,val){
+			var index = acc.indexOf(val);
+			if(index<0) acc.push(val);
+			else acc[index] = val;
+			return acc;
+		},
+		[]
+	);
+};
+
+//Intersects two arrays
+Array.prototype.intersect = function(list,callback){
+	return this.filter(
+		(callback)?
+		function(val1){
+			return list.some(function(val2){ return callback(val1,val2) });
+		}:
+		function(val){
+			return list.contains(val);
+		}
+	);
+};
+
+//Subtracts two arrays
+Array.prototype.subtract = function(list,callback){
+	return this.filter(
+		(callback)?
+		function(val1){
+			return !list.some(function(val2){ return callback(val1,val2) });
+		}:
+		function(val){
+			return !list.contains(val);
+		}
+	);
+};
+
 //Removes first element that fulfills condition
 Array.prototype.remove = function(callback){
 	for(var i=0; i<this.length; i++){
 		if(callback(this[i],i,this)) return this.splice(i,1)[0];}
-	return null;
+	return undefined;
 };
 
 //Removes all elements that fulfill condition
@@ -72,13 +159,29 @@ Array.prototype.removeAll = function(callback){
 
 /* -------------------- Polyfills -------------------- */
 
-//ForEach support for DOM element list
-if(window.HTMLCollection && !HTMLCollection.prototype.forEach)
-    HTMLCollection.prototype.forEach = Array.prototype.forEach;
+//Provides find support to Array
+if(!Array.prototype.find)
+Array.prototype.find = function(callback){
+	for(var i=0; i<this.length; i++){
+		if(callback(this[i],i,this)) return this[i];}
+	return undefined;
+};
 
-//ForEach support for DOM node list
+//Provides findIndex support to Array
+if(!Array.prototype.findIndex)
+Array.prototype.findIndex = function(callback){
+	for(var i=0; i<this.length; i++){
+		if(callback(this[i],i,this)) return i;}
+	return -1;
+};
+
+//Provides forEach support to DOM HTMLCollection
+if(window.HTMLCollection && !HTMLCollection.prototype.forEach)
+HTMLCollection.prototype.forEach = Array.prototype.forEach;
+
+//Provides forEach support to DOM NodeList
 if(window.NodeList && !NodeList.prototype.forEach)
-    NodeList.prototype.forEach = Array.prototype.forEach;
+NodeList.prototype.forEach = Array.prototype.forEach;
 
 /* -------------------- Functions -------------------- */
 
@@ -93,6 +196,12 @@ function ishidden(element){
 	return element.className.contains("hidden");
 }
 
+//Gets DOM template element
+function getTemplateById(id){
+	var template = document.getElementById(id);
+	return document.importNode(template.content || template,true);
+}
+
 //Adds class name of DOM element
 function addClass(element,str){
 	if(!element.className.contains(str)) element.className = (element.className+" "+str).trim();
@@ -100,7 +209,7 @@ function addClass(element,str){
 
 //Adds class name of all DOM elements from list
 function addClassAll(list,str){
-	list.forEach(function(element){addClass(element,str)});
+	list.forEach(function(element){ addClass(element,str) });
 }
 
 //Removes class name of DOM element
@@ -110,7 +219,7 @@ function removeClass(element,str){
 
 //Removes class name of all DOM elements from list
 function removeClassAll(list,str){
-	list.forEach(function(element){removeClass(element,str)});
+	list.forEach(function(element){ removeClass(element,str) });
 }
 
 //Toggles class name of DOM element
@@ -121,7 +230,7 @@ function toggleClass(element,str){
 
 //Toggles class name of all DOM elements from list
 function toggleClassAll(list,str){
-	list.forEach(function(element){toggleClass(element,str)});
+	list.forEach(function(element){ toggleClass(element,str) });
 }
 
 //Shows DOM element
@@ -165,23 +274,25 @@ function removeElementAll(list){
 }
 
 //Imports text file
-function importfile(obj){
-	Array.prototype.forEach.call(obj.files,function(file){
+//args = {(mandatory) files, (optional) accept, success, error}
+function importfile(args){
+	Array.prototype.forEach.call(args.files,function(file){
 		var fileext = file.name.substring(file.name.lastIndexOf("."));
-		if(!obj.accept || obj.accept.contains(file.type) || obj.accept.contains(fileext)){
+		if(!args.accept || args.accept.contains(file.type) || args.accept.contains(fileext)){
 			var reader = new FileReader();
-			if(obj.success) reader.onload = function(){obj.success(this.result)};
-			if(obj.error) reader.onerror = function(event){obj.error(event.target.error)};
+			if(args.success) reader.onload = function(){ args.success(this.result) };
+			if(args.error) reader.onerror = function(event){ args.error(event.target.error) };
 			reader.readAsText(file);}
-		else if(obj.error) obj.error();
+		else if(args.error) args.error();
 	});
 }
 
 //Exports UTF-8 BOM text file
-function exportfile(obj){
+//args = {(mandatory) filename, filetype, data}
+function exportfile(args){
 	var link = document.createElement("a");
-	link.href = "data:"+obj.filetype+";charset=UTF-8,\uFEFF"+encodeURI(obj.data);
-	link.download = obj.filename;
+	link.download = args.filename;
+	link.href = "data:"+args.filetype+";charset=UTF-8,\uFEFF"+encodeURI(args.data);
 	document.body.appendChild(link);
 	link.click();
 }

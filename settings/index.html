@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html>
 	<head>
         <!-- META INFORMATIONS -->
         <meta charset="UTF-8">
@@ -58,7 +58,7 @@
 						you click on the action button by applying Content Security Policy (CSP).
 						You will need to reload tabs in order to see CSP modifications.
 					</p>
-					<ul class="optionlist-v">
+					<ul class="list-options-v">
 						<li>
 							<span class="icon-circle"></span>
 							<label data-i18n>All</label>
@@ -143,7 +143,7 @@
 				<div class="block">
 					<h2 data-i18n>Apply Mode</h2>
 					<p data-i18n="mode_text1">When I click on the action button, apply Content Security Policy to :</p>
-					<ul class="optionlist-h">
+					<ul class="list-options-h">
 						<li>
 							<input type="radio" name="mode" id="mode1" value="1">
 							<label for="mode1" data-i18n>All open tabs</label>
@@ -159,7 +159,7 @@
 					</ul>
 					<p>
 						<i18n data="mode_text2">The domain blacklist is activated if current domain is selected.</i18n>
-						<a class="link nav" href="#blacklist" data-i18n>Manage Domains</a>.
+						<a class="navlink" href="#blacklist" data-i18n>Manage Domains</a>.
 					</p>
 				</div>
 				
@@ -167,7 +167,7 @@
 				<div class="block">
 					<h2 data-i18n>Options</h2>
 					<p data-i18n="options_urlsadd">When I switch CSP ON to current domain, add automatically the domain url to blacklist :</p>
-					<ul class="optionlist-h">
+					<ul class="list-options-h">
 						<li>
 							<input type="radio" name="urlsadd" id="urlsadd1" value="true">
 							<label for="urlsadd1" data-i18n>Enable</label>
@@ -178,7 +178,7 @@
 						</li>
 					</ul>
 					<p data-i18n="options_urlsdel">When I switch CSP OFF to current domain, remove automatically the domain url from blacklist :</p>
-					<ul class="optionlist-h">
+					<ul class="list-options-h">
 						<li>
 							<input type="radio" name="urlsdel" id="urlsdel1" value="true">
 							<label for="urlsdel1" data-i18n>Enable</label>
@@ -189,7 +189,7 @@
 						</li>
 					</ul>
 					<p data-i18n="options_contextmenu">Add ScriptFilter to the browser context menu :</p>
-					<ul class="optionlist-h">
+					<ul class="list-options-h">
 						<li>
 							<input type="radio" name="contextmenu" id="contextmenu1" value="true">
 							<label for="contextmenu1" data-i18n>Enable</label>
@@ -214,14 +214,15 @@
 						<input type="text" class="inputfield" placeholder="Block a domain" data-i18n>
 						<button type="submit" class="button" data-i18n>Add</button>
 					</form>
-					<table class="urllist" id="urllist"></table>
+					<table class="list-urls"></table>
 				</div>
 			</section>
 			
 			<!-- FILE -->
 			<section class="hidden" id="file">
 				<div class="block">
-					<h2 data-i18n="file_import">Import domain blacklist</h2>
+					<h2 data-i18n="file_import1">Import domain blacklist</h2>
+					<p data-i18n="file_import2">Add domains from text file (.txt) or Excel file (.csv).</p>
 					<form class="block-button" id="file-import">
 						<input type="file" class="inputfile" accept=".csv,.txt,text/csv,text/plain">
 						<button type="submit" class="button" data-i18n>Import</button>
@@ -242,8 +243,8 @@
 					</p>
 					<p class="block-button alt hidden" id="clear-confirm">
 						<i18n data="msg_confirm">This operation is irreversible. Continue ?</i18n>
-						<button type="button" class="button btn-yes" data-i18n>Yes</button>
-						<button type="button" class="button btn-no" data-i18n>No</button>
+						<button type="button" class="button btn-yes green" data-i18n>Yes</button>
+						<button type="button" class="button btn-no red" data-i18n>No</button>
 					</p>
 				</div>
 			</section>
@@ -260,5 +261,13 @@
 			<p class="msgbox success hidden" id="msg-add"><span id="nbadd">0</span> <i18n data="msg_add">domain(s) added !</i18n></p>
 			<p class="msgbox warning hidden" id="msg-del"><span id="nbdel">0</span> <i18n data="msg_del">domain(s) deleted !</i18n></p>
 		</footer>
+		
+		<!-- TEMPLATES -->
+		<template id="tpl-blacklist">
+			<tr>
+				<td>URL</td>
+				<td><span class="icon-false" title="Delete" data-i18n></span></td>
+			</tr>
+		</template>
 	</body>
 </html>

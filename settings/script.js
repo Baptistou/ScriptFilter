@@ -13,16 +13,16 @@ function showsection(target){
 
 //Gets colors for icon-circle
 function getcspcolor(item,val){
-	return ["","green","orange","red"][(item=="popup" && val!=1)?3:val];
+	return CSP_COLORS[(item=="popup" && val!=1)? 3 : val];
 }
 
 //Sets CSP value
-function setcspvalue(item){
+function setcspvalue(csp,item){
 	if(item=="all"){
-		csplist.forEach(function(item){
+		CSP_RULES.forEach(function(item){
 			var menu = document.getElementById("csp-"+item);
 			var circle = menu.parentElement.querySelector(".icon-circle");
-			var val = (item=="popup" && csp["all"]!=1)?2:csp["all"];
+			var val = (item=="popup" && csp["all"]!=1)? 2 : csp["all"];
 			menu.value = val;
 			csp[item] = val;
 			circle.className = "icon-circle "+getcspcolor(item,val);
@@ -36,7 +36,7 @@ function setcspvalue(item){
 }
 
 //Adds domain url to blacklist
-function addurl(url){
+function addurl(blacklist,url){
 	url = url.toLowerCase().trim();
 	hideElementAll(document.querySelectorAll(".msgbox"));
 	document.getElementById("nbdel").textContent = 0;
@@ -44,7 +44,7 @@ function addurl(url){
 	if(!url.match(REG_DOMAINURL)){
 		showElement(document.getElementById("msg-chars"));
 		return false;}
-	if(urls.contains(url)){
+	if(blacklist.contains(url)){
 		showElement(document.getElementById("msg-exists"));
 		return false;}
 	showElement(document.getElementById("msg-add"));
@@ -62,68 +62,59 @@ function delurl(url){
 	port.postMessage({status: "delurl", url: url});
 };
 
-//Action buttons
-function getclosebtn(url){
-	var col = document.createElement("td");
-	var button = document.createElement("span");
-	button.className = "icon-false";
-	button.title = geti18ndata("Delete");
-	button.onclick = function(){delurl(url)};
-	col.appendChild(button);
-	return col;
-};
-
 //Converts url list to html into table
-function urlstohtml(target,urls){
-	var table = document.getElementById(target);
+function urlstohtml(urls){
+	var table = document.querySelector("#blacklist table.list-urls");
 	table.textContent = "";
 	urls.forEach(function(url){
-		var row = document.createElement("tr");
-		var col = document.createElement("td");
+		var template = getTemplateById("tpl-blacklist");
+		var col = template.querySelector("td:first-child");
 		col.title = url;
 		col.textContent = url;
-		row.appendChild(col);
-		row.appendChild(getclosebtn(url));
-		table.appendChild(row);
+		template.querySelector(".icon-false").onclick = function(){ delurl(url) };
+		table.appendChild(template);
 	});
 }
 
 //Imports urls from file data
-function importurls(data){
-	var END_OF_LINE = data.contains("\r\n")? "\r\n" : data.contains("\r")? "\r" : "\n";
-	var list = data.split(END_OF_LINE)
+function importurls(blacklist,data){
+	const END_OF_LINE = (data.contains("\r\n"))? "\r\n" : (data.contains("\r"))? "\r" : "\n";
+	var urls = data
+		.split(END_OF_LINE)
 		.map(val => val.toLowerCase().trim())
-		.filter(val => (val && !urls.contains(val)));
+		.filter(val => (val && !blacklist.contains(val)));
 	hideElementAll(document.querySelectorAll(".msgbox"));
-	if(!list.find(val => !val.match(REG_DOMAINURL))){
+	if(urls.every(val => val.match(REG_DOMAINURL))){
 		showElement(document.getElementById("msg-add"));
-		document.getElementById("nbadd").textContent = list.length;
-		port.postMessage({status: "import", urls: list});}
+		document.getElementById("nbadd").textContent = urls.length;
+		port.postMessage({status: "import", urls: urls});}
 	else showElement(document.getElementById("msg-file"));
 }
 
 /* -------------------- Main Process -------------------- */
 
 //Global variables
-var REG_DOMAINURL = /^[\.\*\?a-z0-9_-]+$/;
+const REG_DOMAINURL = /^[\.\*\?a-z0-9_-]+$/;
+const CSP_RULES = ["all","img","media","popup","script","style","frame","connect"];
+const CSP_COLORS = ["","green","orange","red"];
 var port = browser.runtime.Port;
-var csplist = ["all","img","media","popup","script","style","frame","connect"];
-var csp = {};
-var urls = [];
 
 //Operating System
 var PLATFORM_OS = "unknown";
-browser.runtime.getPlatformInfo(function(info){PLATFORM_OS = info.os;});
+browser.runtime.getPlatformInfo(function(info){ PLATFORM_OS = info.os });
 
 window.onload = function(){
+	var csp = {};
+	var blacklist = [];
+	
 	//Connects port with background script
 	port = browser.runtime.connect({name: "settings"});
 	
 	//Retrieves data from port
 	port.onMessage.addListener(function(msg){
 		csp = msg.csp;
-		urls = msg.urls;
-		csplist.forEach(function(item){
+		blacklist = msg.urls;
+		CSP_RULES.forEach(function(item){
 			var menu = document.getElementById("csp-"+item);
 			var circle = menu.parentElement.querySelector(".icon-circle");
 			menu.value = csp[item];
@@ -133,8 +124,8 @@ window.onload = function(){
 		document.getElementById("contextmenu"+(!msg.options.contextmenu+1)).checked = true;
 		document.getElementById("urlsadd"+(!msg.options.urlsadd+1)).checked = true;
 		document.getElementById("urlsdel"+(!msg.options.urlsdel+1)).checked = true;
-		document.getElementById("nburls").textContent = urls.length;
-		urlstohtml("urllist",urls);
+		document.getElementById("nburls").textContent = blacklist.length;
+		urlstohtml(blacklist);
 	});
 	
 	//Links
@@ -144,7 +135,7 @@ window.onload = function(){
 			opentab({url: this.href, index: "next", active: true});
 		};
 	});
-	document.querySelectorAll("nav a.link, a.link.nav").forEach(function(link){
+	document.querySelectorAll("nav a.link[href], a.navlink[href]").forEach(function(link){
 		link.onclick = function(event){
 			event.preventDefault();
 			showsection(this.href.substring(this.href.indexOf("#")+1));
@@ -158,7 +149,7 @@ window.onload = function(){
 	document.getElementById("description").textContent = manifest.description;
 	
 	//Content Security Policy
-	csplist.forEach(function(item){
+	CSP_RULES.forEach(function(item){
 		document.getElementById("csp-"+item).onchange = function(){
 			csp[item] = parseInt(this.value);
 			setcspvalue(item);
@@ -196,16 +187,16 @@ window.onload = function(){
 	//Blocked domains
 	document.getElementById("addurl").onsubmit = function(event){
 		event.preventDefault();
-		if(addurl(this.elements[0].value)) this.reset();
+		if(addurl(blacklist,this.elements[0].value)) this.reset();
 	};
 	
 	//File
 	document.getElementById("file-import").onsubmit = function(event){
 		event.preventDefault();
 		importfile({
-			files: [this.querySelector("input").files[0]],
+			files: this.querySelector("input").files,
 			accept: [".csv",".txt","text/csv","text/plain"],
-			success: importurls,
+			success: function(data){ importurls(blacklist,data) },
 			error: function(){
 				hideElementAll(document.querySelectorAll(".msgbox"));
 				showElement(document.getElementById("msg-import"));
@@ -214,12 +205,12 @@ window.onload = function(){
 		this.reset();
 	};
 	document.getElementById("file-export").onsubmit = function(event){
-		var END_OF_LINE = (PLATFORM_OS=="win")? "\r\n" : (PLATFORM_OS=="mac")? "\r" : "\n";
+		const END_OF_LINE = (PLATFORM_OS=="win")? "\r\n" : (PLATFORM_OS=="mac")? "\r" : "\n";
 		event.preventDefault();
 		exportfile({
 			filename: "ScriptFilter Export.txt",
 			filetype: "text/plain",
-			data: urls.join(END_OF_LINE)
+			data: blacklist.join(END_OF_LINE)
 		});
 		this.reset();
 	};
@@ -228,7 +219,7 @@ window.onload = function(){
 	};
 	document.querySelector("#clear-confirm .btn-yes").onclick = function(){
 		toggleElementAll(document.querySelectorAll("#clear-confirm, #clear-text, #msg-del"));
-		document.getElementById("nbdel").textContent = urls.length;
+		document.getElementById("nbdel").textContent = blacklist.length;
 		port.postMessage({status: "clear"});
 	};
 	document.querySelector("#clear-confirm .btn-no").onclick = function(){
@@ -240,19 +231,21 @@ window.onload = function(){
 		port.postMessage({status: "reload"});
 	};
 	document.getElementById("close").onclick = function(){
-		browser.tabs.getCurrent(function(tab){closetab(tab)});
+		browser.tabs.getCurrent(function(tab){ closetab(tab) });
 	};
-	document.querySelectorAll(".msgbox").forEach(function(msgbox,index,self){
+	document.querySelectorAll(".msgbox").forEach(function(msgbox,index,list){
 		msgbox.onclick = function(){
-			hideElementAll(self);
+			hideElementAll(list);
 			document.getElementById("nbadd").textContent = 0;
 			document.getElementById("nbdel").textContent = 0;
 		};
 	});
 	
-	
 	//Internationalization
 	document.querySelectorAll("i18n, [data-i18n]").forEach(seti18ndata);
+	document.querySelectorAll("template").forEach(function(template){
+		template.content.querySelectorAll("i18n, [data-i18n]").forEach(seti18ndata);
+	});
 };
 
 //Disconnects port
