@@ -37,15 +37,11 @@ function PortConnect(){
 	//Sends message to specified ports
 	//args = {(mandatory) ports, (optional) tabid, msg} || ports
 	this.send = function(args){
-		var portmatch = (
-			(args.ports && args.tabid)?
+		var portmatch = (args.ports && args.tabid)?
 			port => (args.ports.contains(port.name) && args.tabid==port.sender.tab.id):
-			(args.tabid)?
-			port => (args.tabid==port.sender.tab.id):
-			(args.ports)?
-			port => args.ports.contains(port.name):
-			port => args.contains(port.name)
-		);
+			(args.tabid)? port => (args.tabid==port.sender.tab.id):
+			(args.ports)? port => args.ports.contains(port.name):
+			port => args.contains(port.name);
 		this.data.removeAll(function(val){
 			try{
 				if(portmatch(val.port)){
@@ -63,43 +59,63 @@ function PortConnect(){
 /* -------------------- Functions -------------------- */
 
 //Opens a new tab
-function opentab(tab,callback){
-	switch(tab.index){
+//args = {(optional) url, windowId, index, active, pinned}
+function opentab(args,callback){
+	switch(args && args.index){
 	case "next" :
-		var winid = !ANDROID && (tab.windowId || browser.windows.WINDOW_ID_CURRENT);
-		var currenttab = (winid)? {active: true, windowId: winid} : {active: true};
+		var currenttab = (!ANDROID)?
+			{active: true, windowId: args.windowId || browser.windows.WINDOW_ID_CURRENT}:
+			{active: true};
 		browser.tabs.query(currenttab,function(tabs){
-			tab.index = tabs[0].index+1;
-			browser.tabs.create(tab,callback);
+			args.index = tabs[0].index+1;
+			browser.tabs.create(args,callback);
 		});
 	break;
 	case "begin" :
-		tab.index = 0;
-		browser.tabs.create(tab,callback);
+		args.index = 0;
+		browser.tabs.create(args,callback);
 	break;
 	case "end" :
-		tab.index = 1000000;
-		browser.tabs.create(tab,callback);
+		args.index = 1000000;
+		browser.tabs.create(args,callback);
 	break;
-	default : browser.tabs.create(tab,callback);
+	default : browser.tabs.create(args,callback);
 	break;}
 }
 
 //Focuses specified tab
-function focustab(tab){
-	if(!ANDROID) browser.windows.update(tab.windowId,{focused: true});
-	browser.tabs.update(tab.id,{active: true});
+//args = {(mandatory) id, windowId}
+function focustab(args){
+	if(!ANDROID) browser.windows.update(args.windowId,{focused: true});
+	browser.tabs.update(args.id,{active: true});
 }
 
 //Closes specified tab and its window
 //Note: about:config --> browser.tabs.closeWindowWithLastTab
-function closetab(tab){
+//args = {(mandatory) id, windowId}
+function closetab(args){
 	if(!ANDROID)
-		browser.tabs.query({windowId: tab.windowId},function(tabs){
-			if(tabs.length==1 && tabs[0].id==tab.id) browser.windows.remove(tab.windowId);
-			else browser.tabs.remove(tab.id);
+		browser.tabs.query({windowId: args.windowId},function(tabs){
+			if(tabs.length==1 && tabs[0].id==args.id) browser.windows.remove(args.windowId);
+			else browser.tabs.remove(args.id);
 		});
-	else browser.tabs.remove(tab.id);
+	else browser.tabs.remove(args.id);
+}
+
+//Merges all windows into one window
+//Note: No Firefox Android support
+//args = {(optional) windowId, index}
+function mergewindows(args){
+	var movetabs = ((tabs,winid,index) => browser.tabs.move(
+		tabs.filter(tab => (tab.windowId!=winid)).map(tab => tab.id),
+		{windowId: winid, index: (index==0 || index=="begin")? 0 : (!index || index=="end")? -1 : index}
+	));
+	browser.tabs.query({},function(tabs){
+		if(args && args.windowId!=undefined) browser.windows.get(args.windowId,win => movetabs(tabs,win.id,args.index));
+		else if(args && args.index=="next") browser.tabs.getCurrent(tab => movetabs(tabs,tab.windowId,tab.index));
+		else if(args && args.index!=undefined) browser.tabs.getCurrent(tab => movetabs(tabs,tab.windowId,args.index));
+		else browser.tabs.move(tabs.map(tab => tab.id),{windowId: browser.windows.WINDOW_ID_CURRENT, index: -1});
+	});
 }
 
 //Gets i18n message from internationalized files

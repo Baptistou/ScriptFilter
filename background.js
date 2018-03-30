@@ -1,9 +1,27 @@
+/* -------------------- PreProcess -------------------- */
+
+//Global constants
+const PORT_SETTINGS = "settings";
+const MODE_ALL=1, MODE_TAB=2, MODE_URL=3;
+const CSP_ENABLE=1, CSP_RESTRICT=2, CSP_DISABLE=3;
+const BROWSERACTION_TITLE = {true: "ScriptFilter (OFF)", false: "ScriptFilter (ON)"};
+const BROWSERACTION_ICON = {true: "/images/icon-cspoff.png", false: "/images/icon-cspon.png"};
+const CONTEXTMENU_OPTION = "option", CONTEXTMENU_PAGE = "page", CONTEXTMENU_LINK = "link";
+const CONTEXTMENU_PAGE_TITLE = {
+	true: geti18ndata({key: "contextmenu_page1", msg: "Enable CSP"}),
+	false: geti18ndata({key: "contextmenu_page2", msg: "Disable CSP"})
+};
+const CONTEXTMENU_LINK_TITLE = geti18ndata({key: "contextmenu_link", msg: "Open link in new tab with CSP"});
+const REG_DOMAINURL = /^[\.\*\?a-z0-9_-]+$/;
+const CSP_SANDBOX_NOPOPUPS = "sandbox allow-forms allow-orientation-lock allow-pointer-lock"
+	+" allow-presentation allow-same-origin allow-scripts allow-top-navigation;";
+
 /* -------------------- Classes -------------------- */
 
 function CSPManager(){
 //#	Variables
 	this.csp = {};
-	this.mode = 1;
+	this.mode = MODE_TAB;
 	this.options = {};
 	this.urls = [];
 	this.trust = true;
@@ -17,15 +35,15 @@ function CSPManager(){
 	browser.storage.local.get(function(storage){
 		self.csp = storage.csp || {
 			all: 0,
-			img: 1,
-			media: 1,
-			popup: 2,
-			script: 3,
-			style: 1,
-			frame: 3,
-			connect: 3
+			img: CSP_ENABLE,
+			media: CSP_ENABLE,
+			popup: CSP_DISABLE,
+			script: CSP_DISABLE,
+			style: CSP_ENABLE,
+			frame: CSP_DISABLE,
+			connect: CSP_DISABLE
 		};
-		self.mode = storage.mode || 2;
+		self.mode = storage.mode || MODE_TAB;
 		self.options = storage.options || {};
 		self.options = {
 			contextmenu: (!ANDROID && self.options.contextmenu!=false),
@@ -33,8 +51,8 @@ function CSPManager(){
 			urlsdel: (self.options.urlsdel!=false)
 		};
 		self.urls = storage.urls || [];
-		self.trust = (self.mode!=1 || storage.trust!=false);
-		untrusts = (self.mode==3)? self.urls.slice(0) : [];
+		self.trust = (self.mode!=MODE_ALL || storage.trust!=false);
+		untrusts = (self.mode==MODE_URL)? self.urls.slice(0) : [];
 		if(self.options.contextmenu) createcontextmenu();
 		self.updatebutton();
 	});
@@ -55,7 +73,7 @@ function CSPManager(){
 		if(!this.csp.all)
 			return csptostr("img-src",this.csp.img)
 			+ csptostr("media-src",this.csp.media)
-			+ ((this.csp.popup==1)? "" : CSP_SANDBOX_NOPOPUPS)
+			+ ((this.csp.popup!=CSP_ENABLE)? CSP_SANDBOX_NOPOPUPS : "")
 			+ csptostr("script-src",this.csp.script)
 			+ csptostr("style-src",this.csp.style)
 			+ csptostr("child-src",this.csp.frame)	//CSP 2-
@@ -73,9 +91,9 @@ function CSPManager(){
 	
 	this.setmode = function(val){
 		this.mode = parseInt(val);
-		if(this.mode==3) untrusts = untrusts.concat(this.urls.slice(0));
+		if(this.mode==MODE_URL) untrusts = untrusts.concat(this.urls.slice(0));
 		else untrusts.removeAll(val => !Number.isInteger(val));
-		if(this.options.contextmenu) updatecontextmenu("link");
+		if(this.options.contextmenu) updatecontextmenu(CONTEXTMENU_LINK);
 		this.trust = true;
 		this.updatebutton();
 		browser.storage.local.set({mode: this.mode, trust: this.trust});
@@ -92,14 +110,14 @@ function CSPManager(){
 	this.addurl = function(url){
 		if(url.match(REG_DOMAINURL) && !this.urls.contains(url)){
 			this.urls.push(url);
-			if(this.mode==3) untrusts.push(url);
+			if(this.mode==MODE_URL) untrusts.push(url);
 			browser.storage.local.set({urls: this.urls});}
 	};
 	
 	//Removes url from blacklist
 	this.delurl = function(url){
 		this.urls.remove(val => (val==url));
-		if(this.mode==3) untrusts.removeAll(val => (val==url));
+		if(this.mode==MODE_URL) untrusts.removeAll(val => (val==url));
 		browser.storage.local.set({urls: this.urls});
 	};
 	
@@ -107,47 +125,47 @@ function CSPManager(){
 	this.importurls = function(urls){
 		urls.removeAll(val => (!val.match(REG_DOMAINURL) || this.urls.contains(val)));
 		this.urls = this.urls.concat(urls);
-		if(this.mode==3) untrusts = untrusts.concat(urls);
+		if(this.mode==MODE_URL) untrusts = untrusts.concat(urls);
 		browser.storage.local.set({urls: this.urls});
 	};
 	
 	//Clears blacklist
 	this.clear = function(){
 		this.urls = [];
-		if(this.mode==3) untrusts.removeAll(val => !Number.isInteger(val));
+		if(this.mode==MODE_URL) untrusts.removeAll(val => !Number.isInteger(val));
 		browser.storage.local.set({urls: this.urls});
 	};
 	
 	//Reloads all untrusted tabs
 	this.reload = function(){
-		untrusts.forEach(function(val){
-			if(Number.isInteger(val)) browser.tabs.reload(val,{bypassCache: true});
-		});
+		untrusts
+			.filter(val => Number.isInteger(val))
+			.forEach(val => browser.tabs.reload(val,{bypassCache: true}));
 	};
 	
 	//Returns true if tab is trusted
 	this.istrusted = function(tab){
 		if(this.settingsid==tab.id) return true;
 		switch(this.mode){
-		case 1 : return this.trust;
-		case 2 : return !untrusts.find(val => (val==tab.id));
-		case 3 : return !untrusts.find(val => urlmatch(val,urltodomain(tab.url)));}
+		case MODE_ALL : return this.trust;
+		case MODE_TAB : return !untrusts.find(val => (val==tab.id));
+		case MODE_URL : return !untrusts.find(val => urlmatch(val,urltodomain(tab.url)));}
 	};
 	
 	//Sets current focused tab
 	this.setcurrent = function(tab){
 		this.currentid = tab.id;
 		switch(this.mode){
-		case 2 :
+		case MODE_TAB :
 			this.trust = !untrusts.find(val => (val==tab.id));
 			this.updatebutton();
 		break;
-		case 3 :
+		case MODE_URL :
 			var domainurl = urltodomain(tab.url);
 			if(!domainurl) break;
 			this.trust = !untrusts.find(val => urlmatch(val,domainurl));
 			this.updatebutton();
-		case 1 :
+		case MODE_ALL :
 			var cspoff = !untrusts.find(val => (val==tab.id));
 			if(!this.trust && cspoff && this.settingsid!=tab.id){
 				untrusts.push(tab.id);
@@ -160,18 +178,17 @@ function CSPManager(){
 	
 	//Sets trust to browser/tab/domain
 	this.settrust = function(tab){
-		if(this.settingsid!=tab.id || this.mode==1){
+		if(this.settingsid!=tab.id || this.mode==MODE_ALL){
 			this.trust = true;
 			switch(this.mode){
-			case 1 : browser.storage.local.set({trust: this.trust});
+			case MODE_ALL : browser.storage.local.set({trust: this.trust});
 			break;
-			case 2 : untrusts.remove(val => (val==tab.id));
+			case MODE_TAB : untrusts.remove(val => (val==tab.id));
 			break;
-			case 3 :
+			case MODE_URL :
 				var domainurl = urltodomain(tab.url);
 				if(this.options.urlsdel) this.urls.remove(val => (val==domainurl));
-				untrusts.remove(val => (val==tab.id));
-				untrusts.removeAll(val => urlmatch(val,domainurl));
+				untrusts.removeAll(val => (val==tab.id || urlmatch(val,domainurl)));
 				browser.storage.local.set({urls: this.urls});
 			break;}
 			this.updatebutton();}
@@ -179,14 +196,14 @@ function CSPManager(){
 	
 	//Sets untrust to browser/tab/domain
 	this.setuntrust = function(tab){
-		if(this.settingsid!=tab.id || this.mode==1){
+		if(this.settingsid!=tab.id || this.mode==MODE_ALL){
 			this.trust = false;
 			switch(this.mode){
-			case 1 : browser.storage.local.set({trust: this.trust});
+			case MODE_ALL : browser.storage.local.set({trust: this.trust});
 			break;
-			case 2 : untrusts.push(tab.id);
+			case MODE_TAB : untrusts.push(tab.id);
 			break;
-			case 3 :
+			case MODE_URL :
 				var domainurl = urltodomain(tab.url);
 				if(!domainurl) break;
 				var val = this.urls.find(val => urlmatch(val,domainurl));
@@ -206,19 +223,19 @@ function CSPManager(){
 	};
 	
 	//Updates browserAction button
-	//Note: No Firefox Android support for setIcon() and setBadgeText()
+	//Note: No Firefox Android support for setIcon()
 	this.updatebutton = function(){
-		browser.browserAction.setTitle({title: BROWSERACTION_BUTTON["title"][this.trust]});
-		if(!ANDROID) browser.browserAction.setIcon({path: BROWSERACTION_BUTTON["icon"][this.trust]});
-		if(this.options.contextmenu) updatecontextmenu("page");
+		browser.browserAction.setTitle({title: BROWSERACTION_TITLE[this.trust]});
+		if(!ANDROID) browser.browserAction.setIcon({path: BROWSERACTION_ICON[this.trust]});
+		if(this.options.contextmenu) updatecontextmenu(CONTEXTMENU_PAGE);
 	};
 	
 //#	Private methods
 	var csptostr = function(key,val){
 		switch(val){
-		case 1 : return "";
-		case 2 : return key+" 'self';";
-		case 3 : return key+" 'none';";}
+		case CSP_ENABLE : return "";
+		case CSP_RESTRICT : return key+" 'self';";
+		case CSP_DISABLE : return key+" 'none';";}
 	};
 	
 	var urltodomain = function(url){
@@ -226,9 +243,9 @@ function CSPManager(){
 	};
 	
 	var urlmatch = function(val1,val2){
-		if(!(/[\*\?]/.test(val1)) || !val2) return (val1==val2);
-		else return val2.match(val1.replaceAll(".","\\.").replaceAll("*",".*").replaceAll("?","."));
-		
+		return (/[\*\?]/.test(val1) && val2)?
+			val2.match(val1.replaceAll(".","\\.").replaceAll("*",".*").replaceAll("?",".")):
+			(val1==val2);
 	};
 }
 
@@ -237,64 +254,50 @@ function CSPManager(){
 //Creates context menu items
 function createcontextmenu(){
 	browser.contextMenus.create({
-		id: "page",
-		title: I18N_CONTEXTMENU["page"][cspman.trust],
+		id: CONTEXTMENU_PAGE,
+		title: CONTEXTMENU_PAGE_TITLE[cspman.trust],
 		contexts: ["page"]
 	});
 	browser.contextMenus.create({
-		id: "link",
-		title: I18N_CONTEXTMENU["link"],
+		id: CONTEXTMENU_LINK,
+		title: CONTEXTMENU_LINK_TITLE,
 		contexts: ["link"],
-		enabled: (cspman.mode!=1)
+		enabled: (cspman.mode!=MODE_ALL)
 	});
 };
 
 //Updates context menu item
 function updatecontextmenu(menuid){
 	switch(menuid){
-	case "page" : browser.contextMenus.update("page",{title: I18N_CONTEXTMENU["page"][cspman.trust]});
+	case CONTEXTMENU_PAGE :
+		browser.contextMenus.update(CONTEXTMENU_PAGE,{title: CONTEXTMENU_PAGE_TITLE[cspman.trust]});
 	break;
-	case "link" : browser.contextMenus.update("link",{enabled: (cspman.mode!=1)});
+	case CONTEXTMENU_LINK :
+		browser.contextMenus.update(CONTEXTMENU_LINK,{enabled: (cspman.mode!=MODE_ALL)});
 	break;}
 };
 
 //Removes context menu items
 function removecontextmenu(){
-	browser.contextMenus.remove("page");
-	browser.contextMenus.remove("link");
+	browser.contextMenus.remove(CONTEXTMENU_PAGE);
+	browser.contextMenus.remove(CONTEXTMENU_LINK);
 };
 
 //Returns true if HTTP request is opened by Chromium PDF Viewer
 function ischromiumpdf(info){
-	return (CHROMIUM && info.responseHeaders.find(
-		val => (val.name=="Content-Type" && val.value=="application/pdf")
-	));
+	return (CHROMIUM && info.responseHeaders.find(val => (val.name=="Content-Type" && val.value=="application/pdf")));
 }
 
 /* -------------------- Main Process -------------------- */
 
 //Global variables
-const REG_DOMAINURL = /^[\.\*\?a-z0-9_-]+$/;
-const CSP_SANDBOX_NOPOPUPS = "sandbox allow-forms allow-orientation-lock allow-pointer-lock"
-	+" allow-presentation allow-same-origin allow-scripts allow-top-navigation;";
-const BROWSERACTION_BUTTON = {
-	title: {true: "ScriptFilter (OFF)", false: "ScriptFilter (ON)"},
-	icon: {true: "/images/icon-cspoff.png", false: "/images/icon-cspon.png"}
-};
-const I18N_CONTEXTMENU = {
-	page: {
-		true: geti18ndata({key: "contextmenu_page1", msg: "Enable CSP"}),
-		false: geti18ndata({key: "contextmenu_page2", msg: "Disable CSP"})
-	},
-	link: geti18ndata({key: "contextmenu_link", msg: "Open link in new tab with CSP"})
-};
 var portcon = new PortConnect();
 var cspman = new CSPManager();
 
 //Browser action button click
 browser.browserAction.onClicked.addListener(function(tab){
 	cspman.toggletrust(tab);
-	portcon.send(["settings"]);
+	portcon.send([PORT_SETTINGS]);
 });
 
 //OptionsPage browserAction context menu
@@ -303,7 +306,7 @@ browser.browserAction.onClicked.addListener(function(tab){
 //Note: No Firefox Android 56- support + Firefox and Opera issue with openOptionsPage()
 if(FIREFOX && !ANDROID && browser.contextMenus.ContextType.BROWSER_ACTION)
 browser.contextMenus.create({
-	id: "option",
+	id: CONTEXTMENU_OPTION,
 	title: geti18ndata("Settings"),
 	contexts: ["browser_action"]
 });
@@ -314,17 +317,17 @@ browser.contextMenus.create({
 if(!ANDROID)
 browser.contextMenus.onClicked.addListener(function(info,tab){
 	switch(info.menuItemId){
-	case "option" : browser.runtime.openOptionsPage();
+	case CONTEXTMENU_OPTION : browser.runtime.openOptionsPage();
 	break;
-	case "page" :
+	case CONTEXTMENU_PAGE :
 		cspman.toggletrust(tab);
-		portcon.send(["settings"]);
+		portcon.send([PORT_SETTINGS]);
 	break;
-	case "link" :
+	case CONTEXTMENU_LINK :
 		opentab({url: info.linkUrl, index: "next"},function(tab){
 			tab.url = info.linkUrl;
 			if(cspman.istrusted(tab)) cspman.setuntrust(tab);
-			portcon.send(["settings"]);
+			portcon.send([PORT_SETTINGS]);
 		});
 	break;}
 });
@@ -339,9 +342,7 @@ browser.windows.onFocusChanged.addListener(function(winid){
 
 //Tab focus
 browser.tabs.onActivated.addListener(function(info){
-	browser.tabs.get(info.tabId,function(tab){
-		cspman.setcurrent(tab);
-	});
+	browser.tabs.get(info.tabId,tab => cspman.setcurrent(tab));
 });
 
 //Tab update
@@ -355,7 +356,7 @@ browser.webRequest.onHeadersReceived.addListener(
 	function(info){
 		if(!cspman.istrusted({id: info.tabId, url: info.url})){
 			var csp = cspman.getcsp();
-			if(csp.contains("sandbox") && ischromiumpdf(info)) csp = csp.remove(CSP_SANDBOX_NOPOPUPS);
+			if(csp.contains(CSP_SANDBOX_NOPOPUPS) && ischromiumpdf(info)) csp = csp.remove(CSP_SANDBOX_NOPOPUPS);
 			if(csp) info.responseHeaders.push({name: "Content-Security-Policy", value: csp});}
 		return {responseHeaders: info.responseHeaders};
 	},
@@ -392,9 +393,9 @@ browser.runtime.onConnect.addListener(function(port){
 			break
 			case "reload" : cspman.reload();
 			break;}
-			portcon.send(["settings"]);
+			portcon.send([PORT_SETTINGS]);
 		},
 		disconnect: function(){ cspman.settingsid = null }
 	});
-	portcon.send(["settings"]);
+	portcon.send([PORT_SETTINGS]);
 });

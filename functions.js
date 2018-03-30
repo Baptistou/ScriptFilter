@@ -28,14 +28,10 @@ String.prototype.removeAll = function(str){
 };
 
 //Returns first element of array
-Array.prototype.first = function(){
-	return this[0];
-};
+Array.prototype.first = function(){ return this[0] };
 
 //Returns last element of array
-Array.prototype.last = function(){
-	return this[this.length-1];
-};
+Array.prototype.last = function(){ return this[this.length-1] };
 
 //Returns true if array contains val
 Array.prototype.contains = function(val){
@@ -70,14 +66,11 @@ Array.prototype.groupBy = function(callback){
 	return this
 		.reduce(function(acc,val){
 			var key = callback(val);
-			var group = acc.find(function(val){ return (callback(val[0])===key) });
-			if(group===undefined) acc.push([val]);
-			else group.push(val);
+			var group = acc.find(function(group){ return (group.key===key) });
+			if(group) group.value.push(val);
+			else acc.push({key: key, value: [val]});
 			return acc;
-		},[])
-		.map(function(val){ 
-			return (val.length>1)? val : val[0];
-		});
+		},[]);
 };
 
 //Removes duplicate values from array
@@ -123,9 +116,7 @@ Array.prototype.intersect = function(list,callback){
 		function(val1){
 			return list.some(function(val2){ return callback(val1,val2) });
 		}:
-		function(val){
-			return list.contains(val);
-		}
+		function(val){ return list.contains(val) }
 	);
 };
 
@@ -136,9 +127,7 @@ Array.prototype.subtract = function(list,callback){
 		function(val1){
 			return !list.some(function(val2){ return callback(val1,val2) });
 		}:
-		function(val){
-			return !list.contains(val);
-		}
+		function(val){ return !list.contains(val) }
 	);
 };
 
@@ -186,14 +175,12 @@ NodeList.prototype.forEach = Array.prototype.forEach;
 /* -------------------- Functions -------------------- */
 
 //Returns true if string contains only whitespaces
-function isempty(str){
-	return (!str || !(/\S/.test(str)));
-}
+function isempty(str){ return (!str || !str.trim()) }
 
 //Returns true if DOM element is hidden
 function ishidden(element){
 	//return (window.getComputedStyle(element).display=="none");
-	return element.className.contains("hidden");
+	return element.className.split(" ").contains("hidden");
 }
 
 //Gets DOM template element
@@ -204,7 +191,8 @@ function getTemplateById(id){
 
 //Adds class name of DOM element
 function addClass(element,str){
-	if(!element.className.contains(str)) element.className = (element.className+" "+str).trim();
+	var classes = element.className.split(" ");
+	if(!classes.contains(str)) element.className = classes.concat(str).join(" ");
 }
 
 //Adds class name of all DOM elements from list
@@ -214,7 +202,8 @@ function addClassAll(list,str){
 
 //Removes class name of DOM element
 function removeClass(element,str){
-	element.className = element.className.removeAll(str).trim();
+	var classes = element.className.split(" ");
+	if(classes.contains(str)) element.className = classes.filter(function(val){ return (val!=str) }).join(" ");
 }
 
 //Removes class name of all DOM elements from list
@@ -224,8 +213,9 @@ function removeClassAll(list,str){
 
 //Toggles class name of DOM element
 function toggleClass(element,str){
-	if(!element.className.contains(str)) element.className = (element.className+" "+str).trim();
-	else element.className = element.className.removeAll(str).trim();
+	var classes = element.className.split(" ");
+	if(!classes.contains(str)) element.className = classes.concat(str).join(" ");
+	else element.className = classes.filter(function(val){ return (val!=str) }).join(" ");
 }
 
 //Toggles class name of all DOM elements from list

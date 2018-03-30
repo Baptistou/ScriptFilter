@@ -1,3 +1,16 @@
+/* -------------------- PreProcess -------------------- */
+
+//Global constants
+const PORT_SETTINGS = "settings";
+const REG_DOMAINURL = /^[\.\*\?a-z0-9_-]+$/;
+const CSP_ENABLE=1, CSP_RESTRICT=2, CSP_DISABLE=3;
+const CSP_RULES = ["all","img","media","popup","script","style","frame","connect"];
+const CSP_COLORS = ["","green","orange","red"];
+
+//Operating system
+var PLATFORM_OS = "";
+browser.runtime.getPlatformInfo(function(info){ PLATFORM_OS = info.os });
+
 /* -------------------- Functions -------------------- */
 
 //Shows sections
@@ -9,24 +22,24 @@ function showsection(target){
 	document.getElementById("nbadd").textContent = 0;
 	document.getElementById("nbdel").textContent = 0;
 	window.scrollTo(0,0);
-};
+}
 
-//Gets colors for icon-circle
-function getcspcolor(item,val){
-	return CSP_COLORS[(item=="popup" && val!=1)? 3 : val];
+//Gets CSP value according to key
+function getcspvalue(key,val){
+	return (key=="popup" && val!=CSP_ENABLE)? CSP_DISABLE : val;
 }
 
 //Sets CSP value
-function setcspvalue(csp,item){
-	if(item=="all"){
-		CSP_RULES.forEach(function(item){
-			var menu = document.getElementById("csp-"+item);
+function setcspvalue(csp,key){
+	if(key=="all")
+		CSP_RULES.forEach(function(key){
+			var menu = document.getElementById("csp-"+key);
 			var circle = menu.parentElement.querySelector(".icon-circle");
-			var val = (item=="popup" && csp["all"]!=1)? 2 : csp["all"];
+			var val = getcspvalue(key,csp["all"]);
 			menu.value = val;
-			csp[item] = val;
-			circle.className = "icon-circle "+getcspcolor(item,val);
-		});}
+			csp[key] = val;
+			circle.className = "icon-circle "+CSP_COLORS[val];
+		});
 	else{
 		var menu = document.getElementById("csp-all");
 		var circle = menu.parentElement.querySelector(".icon-circle");
@@ -41,26 +54,27 @@ function addurl(blacklist,url){
 	hideElementAll(document.querySelectorAll(".msgbox"));
 	document.getElementById("nbdel").textContent = 0;
 	if(!url) return false;
-	if(!url.match(REG_DOMAINURL)){
-		showElement(document.getElementById("msg-chars"));
+	else if(!url.match(REG_DOMAINURL)){
+		showElement(document.getElementById("msg-invalid-chars"));
 		return false;}
-	if(blacklist.contains(url)){
-		showElement(document.getElementById("msg-exists"));
+	else if(blacklist.contains(url)){
+		showElement(document.getElementById("msg-already-exists"));
 		return false;}
-	showElement(document.getElementById("msg-add"));
-	document.getElementById("nbadd").textContent++;
-	port.postMessage({status: "addurl", url: url});
-	return true;
-};
+	else{
+		showElement(document.getElementById("msg-addurl"));
+		document.getElementById("nbadd").textContent++;
+		port.postMessage({status: "addurl", url: url});
+		return true;}
+}
 
 //Removes domain url from blacklist
 function delurl(url){
 	hideElementAll(document.querySelectorAll(".msgbox"));
-	showElement(document.getElementById("msg-del"));
+	showElement(document.getElementById("msg-delurl"));
 	document.getElementById("nbadd").textContent = 0;
 	document.getElementById("nbdel").textContent++;
 	port.postMessage({status: "delurl", url: url});
-};
+}
 
 //Converts url list to html into table
 function urlstohtml(urls){
@@ -85,40 +99,33 @@ function importurls(blacklist,data){
 		.filter(val => (val && !blacklist.contains(val)));
 	hideElementAll(document.querySelectorAll(".msgbox"));
 	if(urls.every(val => val.match(REG_DOMAINURL))){
-		showElement(document.getElementById("msg-add"));
+		showElement(document.getElementById("msg-addurl"));
 		document.getElementById("nbadd").textContent = urls.length;
 		port.postMessage({status: "import", urls: urls});}
-	else showElement(document.getElementById("msg-file"));
+	else showElement(document.getElementById("msg-invalid-filecontent"));
 }
 
 /* -------------------- Main Process -------------------- */
 
 //Global variables
-const REG_DOMAINURL = /^[\.\*\?a-z0-9_-]+$/;
-const CSP_RULES = ["all","img","media","popup","script","style","frame","connect"];
-const CSP_COLORS = ["","green","orange","red"];
 var port = browser.runtime.Port;
-
-//Operating System
-var PLATFORM_OS = "unknown";
-browser.runtime.getPlatformInfo(function(info){ PLATFORM_OS = info.os });
 
 window.onload = function(){
 	var csp = {};
 	var blacklist = [];
 	
 	//Connects port with background script
-	port = browser.runtime.connect({name: "settings"});
+	port = browser.runtime.connect({name: PORT_SETTINGS});
 	
 	//Retrieves data from port
 	port.onMessage.addListener(function(msg){
 		csp = msg.csp;
 		blacklist = msg.urls;
-		CSP_RULES.forEach(function(item){
-			var menu = document.getElementById("csp-"+item);
+		CSP_RULES.forEach(function(key){
+			var menu = document.getElementById("csp-"+key);
 			var circle = menu.parentElement.querySelector(".icon-circle");
-			menu.value = csp[item];
-			circle.className = "icon-circle "+getcspcolor(item,csp[item]);
+			menu.value = getcspvalue(key,csp[key]);
+			circle.className = "icon-circle "+CSP_COLORS[menu.value];
 		});
 		document.getElementById("mode"+msg.mode).checked = true;
 		document.getElementById("contextmenu"+(!msg.options.contextmenu+1)).checked = true;
@@ -149,19 +156,17 @@ window.onload = function(){
 	document.getElementById("description").textContent = manifest.description;
 	
 	//Content Security Policy
-	CSP_RULES.forEach(function(item){
-		document.getElementById("csp-"+item).onchange = function(){
-			csp[item] = parseInt(this.value);
-			setcspvalue(item);
+	CSP_RULES.forEach(function(key){
+		document.getElementById("csp-"+key).onchange = function(){
+			csp[key] = parseInt(this.value);
+			setcspvalue(csp,key);
 			port.postMessage({status: "CSP", csp: csp});
 		};
 	});
 	
 	//Mode
 	document.getElementsByName("mode").forEach(function(radiobox){
-		radiobox.onchange = function(){
-			port.postMessage({status: "mode", mode: parseInt(this.value)});
-		};
+		radiobox.onchange = function(){ port.postMessage({status: "mode", mode: parseInt(this.value)}) };
 	});
 	
 	//Options
@@ -187,7 +192,7 @@ window.onload = function(){
 	//Blocked domains
 	document.getElementById("addurl").onsubmit = function(event){
 		event.preventDefault();
-		if(addurl(blacklist,this.elements[0].value)) this.reset();
+		if(addurl(blacklist,this.querySelector("input").value)) this.reset();
 	};
 	
 	//File
@@ -199,7 +204,7 @@ window.onload = function(){
 			success: function(data){ importurls(blacklist,data) },
 			error: function(){
 				hideElementAll(document.querySelectorAll(".msgbox"));
-				showElement(document.getElementById("msg-import"));
+				showElement(document.getElementById("msg-invalid-fileext"));
 			}
 		});
 		this.reset();
@@ -218,7 +223,7 @@ window.onload = function(){
 		toggleElementAll(document.querySelectorAll("#clear-confirm, #clear-text"));
 	};
 	document.querySelector("#clear-confirm .btn-yes").onclick = function(){
-		toggleElementAll(document.querySelectorAll("#clear-confirm, #clear-text, #msg-del"));
+		toggleElementAll(document.querySelectorAll("#clear-confirm, #clear-text, #msg-delurl"));
 		document.getElementById("nbdel").textContent = blacklist.length;
 		port.postMessage({status: "clear"});
 	};
@@ -227,12 +232,8 @@ window.onload = function(){
 	};
 	
 	//Footer
-	document.getElementById("reload").onclick = function(){
-		port.postMessage({status: "reload"});
-	};
-	document.getElementById("close").onclick = function(){
-		browser.tabs.getCurrent(function(tab){ closetab(tab) });
-	};
+	document.getElementById("reload").onclick = function(){ port.postMessage({status: "reload"}) };
+	document.getElementById("close").onclick = function(){ browser.tabs.getCurrent(closetab) };
 	document.querySelectorAll(".msgbox").forEach(function(msgbox,index,list){
 		msgbox.onclick = function(){
 			hideElementAll(list);
@@ -248,7 +249,9 @@ window.onload = function(){
 	});
 };
 
-//Disconnects port
+/* -------------------- PostProcess -------------------- */
+
 window.onunload = function(){
+	//Disconnects port
 	port.disconnect();
 };

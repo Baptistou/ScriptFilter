@@ -1,4 +1,4 @@
-﻿ScriptFilter version 3.1 by Baptiste Thémine
+﻿ScriptFilter version 3.2 by Baptiste Thémine
 
 Blocks scripts and resources from a website with Content Security Policy.
 
@@ -10,7 +10,7 @@ It is also possible to create a black list in order to block resources when you 
 
 --------------------------------------------------------------------------------
 
-ScriptFilter version 3.1 par Baptiste Thémine
+ScriptFilter version 3.2 par Baptiste Thémine
 
 Bloque les scripts et les ressources d'un site web avec Content Security Policy.
 
@@ -26,6 +26,11 @@ Language support : English, French, Italian, Spanish.
 Browser support : Firefox 52+, Firefox Android 57+, Chrome 42+, Opera 33+.
 
 Updates :
+* version 3.2 (30/03/2018)
+- Fix CSP All select issue in Settings page.
+- Prevent some potential issues in functions.js.
+- Code improvements.
+
 * version 3.1 (25/03/2018)
 - Fix CSP sandbox invalid option.
 - Fix error on file import when no file is selected.
