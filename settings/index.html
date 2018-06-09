@@ -9,6 +9,7 @@
 		<!-- FAVICON & CSS -->
 		<link rel="icon" type="image/x-icon" href="/images/icon.ico">
 		<link rel="stylesheet" type="text/css" href="custom.css">
+		<link rel="stylesheet" type="text/css" id="include_theme">
 		
 		<!-- JAVASCRIPT -->
 		<script type="text/javascript" src="/functions.js"></script>
@@ -17,19 +18,27 @@
     </head>
 	
     <body>
-		<!-- HEADER -->
-		<header>
-			<h1 class="center">
-				<img class="middle" id="icon" src="/images/icon48.png">
-				<span class="middle">ScriptFilter</span>
-			</h1>
-		</header>
-		
 		<!-- NAVIGATION BAR -->
 		<nav>
-			<a class="link active" href="#settings" data-i18n>Settings</a>
-			<a class="link" href="#blacklist" data-i18n>Domains</a>
-			<a class="link" href="#file" data-i18n>File</a>
+			<div class="nav-title">
+				<img class="image" id="icon" src="/images/icon64.png">
+				<span class="text">ScriptFilter</span>
+			</div>
+			<ul class="nav-menu">
+				<li><a class="link active" href="#settings" data-i18n>Settings</a></li>
+				<li><a class="link" href="#blacklist" data-i18n>Domains</a></li>
+				<li><a class="link" href="#file" data-i18n>File</a></li>
+			</ul>
+			<div class="nav-button">
+				<button id="toggle_action" title="Action menu" data-i18n><span class="icon-hamburger"></span></button>
+				<ul class="list-actions hidden" id="action_menu">
+					<li><button id="untrustall" data-i18n>Enable CSP in all tabs</button></li>
+					<li><button id="trustall" data-i18n>Disable CSP in all tabs</button></li>
+					<li><button id="blacklistall" data-i18n>Add all tabs to blacklist</button></li>
+					<li><button id="reload" data-i18n>Reload all tabs</button></li>
+					<li><button id="close" data-i18n>Close</button></li>
+				</ul>
+			</div>
 		</nav>
 		
 		<!-- CONTENT -->
@@ -38,16 +47,49 @@
 			<section id="settings">
 				<!-- ABOUT -->
 				<div class="block">
-					<h2><i18n>About</i18n> <a class="link" href="/README.txt" title="More Info" data-i18n><span class="icon-help"></span></a></h2>
+					<h2>
+						<i18n>About</i18n>
+						<a class="link ext" href="https://github.com/Baptistou/ScriptFilter/blob/master/README.md" title="More info" data-i18n><span class="icon-help"></span></a>
+					</h2>
 					<p>ScriptFilter <i18n>version</i18n> <span id="version"></span> <i18n>by</i18n> <span id="author"></span>.</p>
-					<p>
-						<span id="description"></span><br>
-						<i18n data="about_review">If you like this add-on or have some ideas to improve it, please send a comment on</i18n>
-						<a class="link" href="https://addons.mozilla.org/firefox/addon/scriptfilteraddon">AMO</a>.
-						<i18n data="about_github">If you encountered any issue, please report it on</i18n>
-						<a class="link" href="https://github.com/Baptistou/ScriptFilter">GitHub</a>.
-						<i18n data="about_thanks">Thank you for downloading ScriptFilter.</i18n>
-					</p>
+					<ul class="slideshow">
+						<span class="arrow-next" title="Next message" data-i18n></span>
+						<li class="active">
+							<p>
+								<img class="image" src="/images/icon64.png">
+								<span id="description"></span>
+							</p>
+						</li>
+						<li>
+							<p>
+								<img class="image" src="/images/github.png">
+								<i18n data="about_github">ScriptFilter is open source ! You can contribute, add a translation or report any issue on</i18n>
+								<a class="link ext" href="https://github.com/Baptistou/ScriptFilter">GitHub</a>.
+							</p>
+						</li>
+						<li>
+							<p>
+								<img class="image" src="/images/firefox.png">
+								<i18n data="about_thanks">Thank you for downloading ScriptFilter.</i18n>
+								<i18n data="about_review">If you like this add-on, please send a comment on</i18n>
+								<a class="link ext" href="https://addons.mozilla.org/firefox/addon/scriptfilteraddon">AMO</a>.
+							</p>
+						</li>
+						<li>
+							<p>
+								<img class="image" src="/images/android.png">
+								<i18n data="about_android">ScriptFilter is also available on Firefox Android.</i18n>
+							</p>
+						</li>
+						<li>
+							<p>
+								<img class="image" src="/images/chrome.png">
+								<i18n data="about_thanks">Thank you for downloading ScriptFilter.</i18n>
+								<i18n data="about_review">If you like this add-on or have some ideas to improve it, please send a comment on</i18n>
+								<a class="link ext" href="https://chrome.google.com/webstore/detail/ljmpgckeehellmpepbfikjbmeepdepfh">Chrome Webstore</a>.
+							</p>
+						</li>
+					</ul>
 				</div>
 				
 				<!-- CONTENT SECURITY POLICY -->
@@ -58,11 +100,11 @@
 						you click on the action button by applying Content Security Policy (CSP).
 						You will need to reload tabs in order to see CSP modifications.
 					</p>
-					<ul class="list-options-v">
+					<ul class="list-options vertical">
 						<li>
 							<span class="icon-circle"></span>
 							<label data-i18n>All</label>
-							<select class="menu" id="csp-all">
+							<select class="menu" id="csp_all">
 								<option value="0" class="hidden" data-i18n>Custom</option>
 								<option value="1" data-i18n>Enable</option>
 								<option value="2" data-i18n>Restrict</option>
@@ -72,7 +114,7 @@
 						<li>
 							<span class="icon-circle"></span>
 							<label data-i18n>Images</label>
-							<select class="menu" id="csp-img">
+							<select class="menu" id="csp_img">
 								<option value="1" data-i18n>Enable</option>
 								<option value="2" data-i18n>Restrict</option>
 								<option value="3" data-i18n>Disable</option>
@@ -81,7 +123,7 @@
 						<li>
 							<span class="icon-circle"></span>
 							<label data-i18n="medias">Medias (Audio+Video)</label>
-							<select class="menu" id="csp-media">
+							<select class="menu" id="csp_media">
 								<option value="1" data-i18n>Enable</option>
 								<option value="2" data-i18n>Restrict</option>
 								<option value="3" data-i18n>Disable</option>
@@ -90,7 +132,7 @@
 						<li>
 							<span class="icon-circle"></span>
 							<label data-i18n>Popups</label>
-							<select class="menu" id="csp-popup">
+							<select class="menu" id="csp_popup">
 								<option value="1" data-i18n>Enable</option>
 								<option value="3" data-i18n>Disable</option>
 							</select>
@@ -98,7 +140,7 @@
 						<li>
 							<span class="icon-circle"></span>
 							<label data-i18n>Scripts</label>
-							<select class="menu" id="csp-script">
+							<select class="menu" id="csp_script">
 								<option value="1" data-i18n>Enable</option>
 								<option value="2" data-i18n>Restrict</option>
 								<option value="3" data-i18n>Disable</option>
@@ -107,7 +149,7 @@
 						<li>
 							<span class="icon-circle"></span>
 							<label data-i18n>Stylesheets CSS</label>
-							<select class="menu" id="csp-style">
+							<select class="menu" id="csp_style">
 								<option value="1" data-i18n>Enable</option>
 								<option value="2" data-i18n>Restrict</option>
 								<option value="3" data-i18n>Disable</option>
@@ -115,8 +157,8 @@
 						</li>
 						<li>
 							<span class="icon-circle"></span>
-							<label data-i18n>Subframes</label>
-							<select class="menu" id="csp-frame">
+							<label data-i18n>Frames and objects</label>
+							<select class="menu" id="csp_frame">
 								<option value="1" data-i18n>Enable</option>
 								<option value="2" data-i18n>Restrict</option>
 								<option value="3" data-i18n>Disable</option>
@@ -124,8 +166,8 @@
 						</li>
 						<li>
 							<span class="icon-circle"></span>
-							<label data-i18n>Subrequests XHR</label>
-							<select class="menu" id="csp-connect">
+							<label data-i18n>Requests AJAX</label>
+							<select class="menu" id="csp_connect">
 								<option value="1" data-i18n>Enable</option>
 								<option value="2" data-i18n>Restrict</option>
 								<option value="3" data-i18n>Disable</option>
@@ -143,7 +185,7 @@
 				<div class="block">
 					<h2 data-i18n>Apply Mode</h2>
 					<p data-i18n="mode_text1">When I click on the action button, apply Content Security Policy to :</p>
-					<ul class="list-options-h">
+					<ul class="list-options horizontal">
 						<li>
 							<input type="radio" name="mode" id="mode1" value="1">
 							<label for="mode1" data-i18n>All open tabs</label>
@@ -159,37 +201,37 @@
 					</ul>
 					<p>
 						<i18n data="mode_text2">The domain blacklist is activated if current domain is selected.</i18n>
-						<a class="navlink" href="#blacklist" data-i18n>Manage Domains</a>.
+						<a class="link nav" href="#blacklist" data-i18n>Manage domains</a>.
 					</p>
 				</div>
 				
 				<!-- OPTIONS -->
 				<div class="block">
 					<h2 data-i18n>Options</h2>
-					<p data-i18n="options_urlsadd">When I switch CSP ON to current domain, add automatically the domain url to blacklist :</p>
-					<ul class="list-options-h">
+					<p data-i18n="options_autoaddurl">When I switch CSP ON to current domain, add automatically the domain url to blacklist :</p>
+					<ul class="list-options horizontal">
 						<li>
-							<input type="radio" name="urlsadd" id="urlsadd1" value="true">
-							<label for="urlsadd1" data-i18n>Enable</label>
+							<input type="radio" name="autoaddurl" id="autoaddurl1" value="true">
+							<label for="autoaddurl1" data-i18n>Enable</label>
 						</li>
 						<li>
-							<input type="radio" name="urlsadd" id="urlsadd2" value="false">
-							<label for="urlsadd2" data-i18n>Disable</label>
+							<input type="radio" name="autoaddurl" id="autoaddurl2" value="false">
+							<label for="autoaddurl2" data-i18n>Disable</label>
 						</li>
 					</ul>
-					<p data-i18n="options_urlsdel">When I switch CSP OFF to current domain, remove automatically the domain url from blacklist :</p>
-					<ul class="list-options-h">
+					<p data-i18n="options_autodelurl">When I switch CSP OFF to current domain, remove automatically the domain url from blacklist :</p>
+					<ul class="list-options horizontal">
 						<li>
-							<input type="radio" name="urlsdel" id="urlsdel1" value="true">
-							<label for="urlsdel1" data-i18n>Enable</label>
+							<input type="radio" name="autodelurl" id="autodelurl1" value="true">
+							<label for="autodelurl1" data-i18n>Enable</label>
 						</li>
 						<li>
-							<input type="radio" name="urlsdel" id="urlsdel2" value="false">
-							<label for="urlsdel2" data-i18n>Disable</label>
+							<input type="radio" name="autodelurl" id="autodelurl2" value="false">
+							<label for="autodelurl2" data-i18n>Disable</label>
 						</li>
 					</ul>
 					<p data-i18n="options_contextmenu">Add ScriptFilter to the browser context menu :</p>
-					<ul class="list-options-h">
+					<ul class="list-options horizontal">
 						<li>
 							<input type="radio" name="contextmenu" id="contextmenu1" value="true">
 							<label for="contextmenu1" data-i18n>Enable</label>
@@ -197,6 +239,21 @@
 						<li>
 							<input type="radio" name="contextmenu" id="contextmenu2" value="false">
 							<label for="contextmenu2" data-i18n>Disable</label>
+						</li>
+					</ul>
+				</div>
+				
+				<!-- THEME -->
+				<div class="block">
+					<h2 data-i18n>Theme</h2>
+					<ul class="list-options horizontal">
+						<li>
+							<input type="radio" name="uitheme" id="uitheme1" value="1">
+							<label for="uitheme1" data-i18n>Light</label>
+						</li>
+						<li>
+							<input type="radio" name="uitheme" id="uitheme2" value="2">
+							<label for="uitheme2" data-i18n>Dark</label>
 						</li>
 					</ul>
 				</div>
@@ -211,7 +268,7 @@
 						You can add domain urls with wildcards "*" and "?" such as "www.ex?mple.*".
 					</p>
 					<form class="block-button" id="addurl">
-						<input type="text" class="inputfield" placeholder="Block a domain" data-i18n>
+						<input type="text" class="inputfield" name="url" placeholder="Block a domain" data-i18n>
 						<button type="submit" class="button" data-i18n>Add</button>
 					</form>
 					<table class="list-urls"></table>
@@ -223,25 +280,29 @@
 				<div class="block">
 					<h2 data-i18n="file_import1">Import domain blacklist</h2>
 					<p data-i18n="file_import2">Add domains from text file (.txt) or Excel file (.csv).</p>
-					<form class="block-button" id="file-import">
+					<form class="block-button" id="file_import">
 						<input type="file" class="inputfile" accept=".csv,.txt,text/csv,text/plain">
 						<button type="submit" class="button" data-i18n>Import</button>
 					</form>
 				</div>
 				<div class="block">
 					<h2 data-i18n="file_export1">Export domain blacklist</h2>
-					<form class="block-button" id="file-export">
-						<i18n data="file_export2">Download the domain blacklist as text file.</i18n>
+					<form class="block-button alt" id="file_export">
+						<i18n data="file_export2">Download the domain blacklist as file...</i18n>
+						<select class="menu" id="export_type" name="export_type">
+							<option value="1">Text (.txt)</option>
+							<option value="2">Excel (.csv)</option>
+						</select>
 						<button type="submit" class="button" data-i18n>Export</button>
 					</form>
 				</div>
 				<div class="block">
 					<h2 data-i18n="file_clear1">Clear domain blacklist</h2>
-					<p class="block-button" id="clear-text">
+					<p class="block-button" id="clear_text">
 						<i18n data="file_clear2">Removes all domain urls from the blacklist.</i18n>
 						<button type="button" class="button" data-i18n>Clear</button>
 					</p>
-					<p class="block-button alt hidden" id="clear-confirm">
+					<p class="block-button alt hidden" id="clear_confirm">
 						<i18n data="msg_clear_confirm">This operation is irreversible. Continue ?</i18n>
 						<button type="button" class="button btn-yes green" data-i18n>Yes</button>
 						<button type="button" class="button btn-no red" data-i18n>No</button>
@@ -252,18 +313,18 @@
 		
 		<!-- FOOTER -->
 		<footer>
-			<button class="button" id="reload" data-i18n>Reload Tabs</button>
-			<button class="button" id="close" data-i18n>Close</button>
-			<p class="msgbox error hidden" id="msg-invalid-chars" data-i18n="msg_invalid_chars">The domain url contains unexpected characters !</p>
-			<p class="msgbox error hidden" id="msg-already-exists" data-i18n="msg_already_exists">The domain url already exists in the blacklist !</p>
-			<p class="msgbox error hidden" id="msg-invalid-fileext" data-i18n="msg_invalid_fileext">Import failed ! Please select a .txt or .csv file !</p>
-			<p class="msgbox error hidden" id="msg-invalid-filecontent" data-i18n="msg_invalid_filecontent">The imported file contains unexpected characters !</p>
-			<p class="msgbox success hidden" id="msg-addurl"><span id="nbadd">0</span> <i18n data="msg_addurl">domain(s) added !</i18n></p>
-			<p class="msgbox warning hidden" id="msg-delurl"><span id="nbdel">0</span> <i18n data="msg_delurl">domain(s) deleted !</i18n></p>
+			<p class="msgbox error hidden" id="msg_invalid_chars" data-i18n="msg_invalid_chars">The domain url contains unexpected characters !</p>
+			<p class="msgbox error hidden" id="msg_already_exists" data-i18n="msg_already_exists">The domain url already exists in the blacklist !</p>
+			<p class="msgbox error hidden" id="msg_invalid_fileext" data-i18n="msg_invalid_fileext">Import failed : Please select a .txt or .csv file !</p>
+			<p class="msgbox error hidden" id="msg_invalid_filecontent">
+				<i18n data="msg_invalid_filecontent">Import failed : Unexpected characters found at line</i18n> <span id="fileline">0</span> !
+			</p>
+			<p class="msgbox success hidden" id="msg_addurl"><span id="nbadd">0</span> <i18n data="msg_addurl">domain(s) added !</i18n></p>
+			<p class="msgbox warning hidden" id="msg_delurl"><span id="nbdel">0</span> <i18n data="msg_delurl">domain(s) deleted !</i18n></p>
 		</footer>
 		
 		<!-- TEMPLATES -->
-		<template id="tpl-blacklist">
+		<template id="tpl_blacklist">
 			<tr>
 				<td>URL</td>
 				<td><span class="icon-false" title="Delete" data-i18n></span></td>

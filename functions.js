@@ -63,14 +63,13 @@ Array.prototype.flatMap = function(callback){
 
 //Groups array values by key from specified callback
 Array.prototype.groupBy = function(callback){
-	return this
-		.reduce(function(acc,val){
-			var key = callback(val);
-			var group = acc.find(function(group){ return (group.key===key) });
-			if(group) group.value.push(val);
-			else acc.push({key: key, value: [val]});
-			return acc;
-		},[]);
+	return this.reduce(function(acc,val){
+		var key = callback(val);
+		var group = acc.find(function(group){ return (group.key===key) });
+		if(group) group.value.push(val);
+		else acc.push({key: key, value: [val]});
+		return acc;
+	},[]);
 };
 
 //Removes duplicate values from array
@@ -138,17 +137,46 @@ Array.prototype.remove = function(callback){
 	return undefined;
 };
 
-//Removes all elements that fulfill condition
-Array.prototype.removeAll = function(callback){
-	var list = [];
-	for(var i=0; i<this.length; i++){
-		if(callback(this[i],i,this)) list.push(this.splice(i--,1)[0]);}
-	return list;
-};
-
 /* -------------------- Polyfills -------------------- */
 
-//Provides find support to Array
+//ECMAScript 2015
+if(!Array.from)
+Array.from = (function(){
+	var toStr = Object.prototype.toString;
+	var isCallable = function(fn){ return (typeof fn==="function" || toStr.call(fn)==="[object Function]") };
+	var toInteger = function(value){
+		var number = Number(value);
+		if(isNaN(number)) return 0;
+		if(number===0 || !isFinite(number)) return number;
+		return ((number>0)?1:-1)*Math.floor(Math.abs(number));
+	};
+	var maxSafeInteger = Math.pow(2,53)-1;
+	var toLength = function(value){ return Math.min(Math.max(toInteger(value),0),maxSafeInteger) };
+
+	return function from(arrayLike/*,mapFn,thisArg*/){
+		var C = this;
+		var items = Object(arrayLike);
+		if(arrayLike==null) throw new TypeError("Array.from doit utiliser un objet semblable à un tableau");
+		var mapFn = (arguments.length>1) ? arguments[1] : void undefined;
+		var T;
+		if(typeof mapFn!=='undefined'){
+			if(!isCallable(mapFn))
+				throw new TypeError("Array.from: lorsqu'il est utilisé le deuxième argument doit être une fonction");
+			if(arguments.length>2) T = arguments[2];
+		}
+		var len = toLength(items.length);
+		var A = (isCallable(C))? Object(new C(len)) : new Array(len);
+		for(var k=0, kValue; k<len; k++){
+			kValue = items[k];
+			if(mapFn) A[k] = (typeof T==="undefined")? mapFn(kValue,k) : mapFn.call(T,kValue,k);
+			else A[k] = kValue;
+		}
+		A.length = len;
+		return A;
+	};
+}());
+
+//ECMAScript 2015
 if(!Array.prototype.find)
 Array.prototype.find = function(callback){
 	for(var i=0; i<this.length; i++){
@@ -156,7 +184,7 @@ Array.prototype.find = function(callback){
 	return undefined;
 };
 
-//Provides findIndex support to Array
+//ECMAScript 2015
 if(!Array.prototype.findIndex)
 Array.prototype.findIndex = function(callback){
 	for(var i=0; i<this.length; i++){
@@ -164,11 +192,11 @@ Array.prototype.findIndex = function(callback){
 	return -1;
 };
 
-//Provides forEach support to DOM HTMLCollection
+//DOM Level 3 2017
 if(window.HTMLCollection && !HTMLCollection.prototype.forEach)
 HTMLCollection.prototype.forEach = Array.prototype.forEach;
 
-//Provides forEach support to DOM NodeList
+//DOM Level 3 2017
 if(window.NodeList && !NodeList.prototype.forEach)
 NodeList.prototype.forEach = Array.prototype.forEach;
 
@@ -189,31 +217,36 @@ function getTemplateById(id){
 	return document.importNode(template.content || template,true);
 }
 
-//Adds class name of DOM element
+//Returns true if DOM element has class name
+function hasClass(element,str){
+	return element.className && element.className.split(" ").contains(str);
+}
+
+//Adds class name to DOM element
 function addClass(element,str){
-	var classes = element.className.split(" ");
+	var classes = (element.className)? element.className.split(" ") : [];
 	if(!classes.contains(str)) element.className = classes.concat(str).join(" ");
 }
 
-//Adds class name of all DOM elements from list
+//Adds class name to all DOM elements
 function addClassAll(list,str){
 	list.forEach(function(element){ addClass(element,str) });
 }
 
-//Removes class name of DOM element
+//Removes class name from DOM element
 function removeClass(element,str){
-	var classes = element.className.split(" ");
+	var classes = (element.className)? element.className.split(" ") : [];
 	if(classes.contains(str)) element.className = classes.filter(function(val){ return (val!=str) }).join(" ");
 }
 
-//Removes class name of all DOM elements from list
+//Removes class name from all DOM elements
 function removeClassAll(list,str){
 	list.forEach(function(element){ removeClass(element,str) });
 }
 
 //Toggles class name of DOM element
 function toggleClass(element,str){
-	var classes = element.className.split(" ");
+	var classes = (element.className)? element.className.split(" ") : [];
 	if(!classes.contains(str)) element.className = classes.concat(str).join(" ");
 	else element.className = classes.filter(function(val){ return (val!=str) }).join(" ");
 }
@@ -228,7 +261,7 @@ function showElement(element){
 	if(element) removeClass(element,"hidden");
 }
 
-//Shows all DOM elements from list
+//Shows all DOM elements
 function showElementAll(list){
 	list.forEach(showElement);
 }
@@ -238,7 +271,7 @@ function hideElement(element){
 	if(element) addClass(element,"hidden");
 }
 
-//Hides all DOM elements from list
+//Hides all DOM elements
 function hideElementAll(list){
 	list.forEach(hideElement);
 }
@@ -248,7 +281,7 @@ function toggleElement(element){
 	if(element) toggleClass(element,"hidden");
 }
 
-//Toggles all DOM elements from list
+//Toggles all DOM elements
 function toggleElementAll(list){
 	list.forEach(toggleElement);
 }
@@ -258,13 +291,13 @@ function removeElement(element){
 	if(element) element.parentElement.removeChild(element);
 }
 
-//Removes all DOM elements from list
+//Removes all DOM elements
 function removeElementAll(list){
 	list.forEach(removeElement);
 }
 
 //Imports text file
-//args = {(mandatory) files, (optional) accept, success, error}
+//args = {(mandatory) files [array], (optional) accept [array], success [function], error [function]}
 function importfile(args){
 	Array.prototype.forEach.call(args.files,function(file){
 		var fileext = file.name.substring(file.name.lastIndexOf("."));
@@ -278,11 +311,84 @@ function importfile(args){
 }
 
 //Exports UTF-8 BOM text file
-//args = {(mandatory) filename, filetype, data}
+//args = {(mandatory) filename [string], filetype [string], data [string]}
 function exportfile(args){
 	var link = document.createElement("a");
 	link.download = args.filename;
 	link.href = "data:"+args.filetype+";charset=UTF-8,\uFEFF"+encodeURI(args.data);
 	document.body.appendChild(link);
 	link.click();
+}
+
+/* -------------------- Classes -------------------- */
+
+//Manages Timeout and Interval
+//args = {(mandatory) func [function], delay [int], (optional) repeat [bool], autostart [bool], runonstart [bool]}
+function Timer(args){
+//#	Variables
+	var self = this;
+	var timeout = null;
+	var interval = null;
+	var lasttime = null;
+	var difftime = null;
+	var active = false;
+	
+//#	Public methods
+	this.start = function(){
+		if(!active){
+			lasttime = (new Date()).getTime();
+			active = true;
+			timeoutinterval(args.runonstart);}
+	};
+	
+	this.stop = function(){
+		if(active){
+			if(timeout) timeout = clearTimeout(timeout);
+			if(interval) interval = clearInterval(interval);
+			difftime = null;
+			active = false;}
+	};
+	
+	this.restart = function(){
+		this.stop();
+		this.start();
+	};
+	
+	this.resume = function(){
+		if(active && difftime!=null){
+			if(difftime<args.delay){
+				lasttime = (new Date()).getTime()-difftime;
+				timeout = setTimeout(function(){ timeoutinterval(true) },args.delay-difftime);}
+			else timeoutinterval(true);
+			difftime = null;}
+	};
+	
+	this.pause = function(){
+		if(active && difftime==null){
+			this.stop();
+			difftime = (new Date()).getTime()-lasttime;
+			active = true;}
+	};
+	
+//#	Private methods
+	var timeoutcallback = function(){
+		active = false;
+		args.func();
+	};
+	
+	var intervalcallback = function(){
+		lasttime = (new Date()).getTime();
+		args.func();
+	};
+	
+	var timeoutinterval = function(runonstart){
+		if(args.repeat){
+			if(runonstart) intervalcallback();
+			interval = setInterval(intervalcallback,args.delay);}
+		else if(runonstart) timeoutcallback();
+		else timeout = setTimeout(timeoutcallback,args.delay);
+	};
+	
+//#	Constructors
+	if(args.autostart) this.start();
 }

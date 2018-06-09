@@ -38,6 +38,10 @@ p {
 	margin: 10rem 0;
 }
 
+button {
+	color: inherit;
+}
+
 input:disabled+label {
 	color: #888888;
 }
@@ -70,7 +74,23 @@ input:disabled+label {
 	display: none !important;
 }
 
+@keyframes fadein {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
+@keyframes fadein90 {
+	from { opacity: 0; }
+	to { opacity: 0.9; }
+}
+
 /* -------------------- Components -------------------- */
+
+.link {
+	color: black;
+	text-decoration: underline;
+	cursor: pointer;
+}
 
 .button {
 	display: inline-block;
@@ -86,7 +106,7 @@ input:disabled+label {
 	background-color: #000042;
 	color: white;
 	cursor: pointer;
-	/* Fix bug in touch screen */
+	/* Fix text selection issue on click */
 	-webkit-user-select: none;
 	-moz-user-select: none;
 	-ms-user-select: none;
@@ -105,7 +125,7 @@ input:disabled+label {
 	color: #E0E0E0;
 }
 
-/* Fix CSS bug in Firefox */
+/* Fix CSS issue on Firefox */
 .button::-moz-focus-inner {
 	padding: 0;
 	border: 0;
@@ -129,8 +149,8 @@ input:disabled+label {
 	margin: 5rem 0 5rem 0;
 	border: 1rem solid #E8E8E8;
 	font-size: 18rem;
-	background-color: #E8E8E8;
 	color: black;
+	background-color: #E8E8E8;
 }
 
 input.inputfield {
@@ -160,14 +180,14 @@ input.inputfile {
 	width: 100%;
 }
 
-/* Fix CSS bug in Chrome and Opera */
+/* Fix CSS issue on Chrome and Opera */
 input.inputfile::-webkit-file-upload-button {
 	height: 100%;
 }
 
 select.menu {
 	display: inline-block;
-	height: 30rem;
+	height: 34rem;
 	width: 100%;
 	margin: 0;
 	padding: 0;
@@ -186,7 +206,7 @@ select.menu {
 	margin: 0;
 }
 
-.block-button>.button {
+.block-button>.button, .block-button>.menu {
 	float: left;
 	width: 100rem;
 }
@@ -199,30 +219,152 @@ select.menu {
 	margin-left: 5rem;
 }
 
+img.image {
+	display: inline-block;
+	width: 300rem;
+	max-width: 100%;
+	/* Fix link border issue on IE 10- */
+	border: none;
+}
+
 /* -------------------- Navigation bar -------------------- */
 
 nav {
 	display: block;
-	max-width: 800rem;
-	margin: auto;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 100;
+	height: 50rem;
+	line-height: 50rem;
 	font-size: 24rem;
+	background-color: white;
+	box-shadow: 0 0 5rem rgba(0,0,0,0.175);
+	/* Fix text selection issue on click */
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	/* Fix zoom issue on mobile screen */
+	overflow: hidden;
+}
+
+nav .nav-title {
+	display: block;
+	float: left;
+	border-right: 1px solid #E0E0E0;
+}
+
+nav .nav-title>.image {
+	display: block;
+	float: left;
+	height: 50rem;
+	width: 50rem;
+}
+
+nav .nav-title>.text {
+	display: inline-block;
 	padding: 0 10rem 0 10rem;
 }
 
 nav .link {
-	padding: 5rem;
+	display: inline-block;
+	padding: 0 10rem 0 10rem;
 	color: #888888;
 	text-decoration: none;
 	cursor: pointer;
 }
 
 nav .link:hover {
-	background-color: #E0E0E0;
+	background-color: #E8E8E8;
 }
 
 nav .link.active {
-	color: #0042AA;
+	color: black;
 	text-decoration: underline;
+}
+
+nav ul.nav-menu {
+	display: table;
+	float: left;
+	margin: 0;
+	padding: 0;
+	letter-spacing: -0.31em;
+	list-style: none;
+}
+
+nav ul.nav-menu>li {
+	display: inline-block;
+	letter-spacing: normal;
+}
+
+nav .nav-button {
+	display: block;
+	float: right;
+	border-left: 1px solid #E0E0E0;
+}
+
+nav .nav-button>button {
+	display: block;
+	height: 50rem;
+	width: 50rem;
+	border: none;
+	background: none;
+	text-align: center;
+	cursor: pointer;
+}
+
+nav .nav-button>button:hover {
+	background-color: #E8E8E8;
+}
+
+ul.list-actions {
+	display: block;
+	position: fixed;
+	top: 50rem;
+	right: 0;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	font-size: 20rem;
+	background-color: white;
+	box-shadow: 0 0 5rem rgba(0,0,0,0.175);
+	animation: fadein 0.5s;
+}
+
+ul.list-actions>li {
+	border-top: 1px solid #E0E0E0;
+}
+
+ul.list-actions>li:first-child {
+	border-top: none;
+}
+
+ul.list-actions button {
+	display: block;
+	height: 50rem;
+	width: 100%;
+	padding: 0 10rem 0 10rem;
+	border: none;
+	text-align: left;
+	white-space: pre;
+	background: none;
+	cursor: pointer;
+}
+
+ul.list-actions button:hover {
+	background-color: #E8E8E8;
+}
+
+ul.list-actions button:disabled {
+	color: #888888;
+	background-color: white;
+}
+
+@media screen and (orientation: portrait) and (max-width: 500px) {
+	nav .nav-title { border-right: none; }
+	nav .nav-title>.text { display: none; }
 }
 
 /* -------------------- Content -------------------- */
@@ -231,7 +373,11 @@ content {
 	display: block;
 	max-width: 800rem;
 	margin: auto;
-	padding: 0 10rem 50rem 10rem;
+	padding: 50rem 10rem 0 10rem;
+}
+
+@media screen and (min-width: 1600px) {
+	content { max-width: 50%; }
 }
 
 .block {
@@ -240,49 +386,109 @@ content {
 	border-top: 1px solid #E0E0E0;
 }
 
+.block:first-child {
+	border-top: none;
+}
+
 h2 .link {
 	float: right;
 }
 
 /* -------------------- Settings -------------------- */
 
-ul.list-options-v {
+ul.slideshow {
 	display: block;
-	max-width: 600rem;
-	margin: 10rem auto 10rem auto;
+	position: relative;
+	margin: 10rem 0 10rem 0;
+	padding: 0;
+	list-style: none;
+	background-color: white;
+}
+
+ul.slideshow>li {
+	display: none;
+}
+
+ul.slideshow>li.active {
+	display: list-item;
+	position: relative;
+	padding: 2rem 10rem 2rem 10rem;
+	box-shadow: 0 0 2rem rgba(0,0,0,0.2);
+	animation: fadein 1s;
+}
+
+ul.slideshow>.arrow-next {
+	display: inline-block;
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	z-index: 10;
+	line-height: 25rem;
+	width: 25rem;
+	text-align: center;
+	color: white;
+	background-color: black;
+	opacity: 0.2;
+	cursor: pointer;
+}
+
+ul.slideshow>.arrow-next:hover {
+	opacity: 0.4;
+}
+
+ul.slideshow>.arrow-next::before {
+	content: "\276F";
+}
+
+ul.slideshow p {
+	display: block;
+	overflow: hidden;
+}
+
+ul.slideshow img.image {
+	display: block;
+	float: left;
+	height: 50rem;
+	width: 50rem;
+	margin-right: 10rem;
+}
+
+ul.list-options {
+	display: block;
+	margin: 0;
 	padding: 0;
 	list-style: none;
 }
 
-ul.list-options-v>li {
-	height: 30rem;
+ul.list-options>li:hover {
+	background-color: #E8E8E8;
+}
+
+ul.list-options.vertical>li {
 	line-height: 30rem;
+	padding: 5rem;
 }
 
-ul.list-options-v>li:hover {
-	background-color: #E0E0E0;
-}
-
-ul.list-options-v>li select.menu {
-	display: block;
-	float: right;
-	width: 120rem;
-}
-
-ul.list-options-h {
-	display: block;
-	margin: 10rem 0 10rem 0;
-	padding: 0;
-}
-
-ul.list-options-h>li {
+ul.list-options.horizontal>li {
 	display: inline-block;
 	padding: 5rem;
 	margin: 0 5rem 0 5rem;
 }
 
-ul.list-options-h>li:hover {
-	background-color: #E0E0E0;
+ul.list-options.fullwidth label {
+	display: block;
+	padding: 5rem;
+}
+
+ul.list-options.fullwidth label:hover {
+	background-color: #E8E8E8;
+}
+
+ul.list-options select.menu {
+	display: block;
+	float: right;
+	height: 30rem;
+	width: 150rem;
 }
 
 /* -------------------- Domain blacklist -------------------- */
@@ -302,12 +508,16 @@ table.list-urls {
 	border-collapse: collapse;
 }
 
+table.list-urls>tr {
+	border-top: 1rem solid #E0E0E0;
+}
+
 table.list-urls>tr:first-child {
 	border-top: 0;
 }
 
-table.list-urls>tr {
-	border-top: 1rem solid #E0E0E0;
+table.list-urls>tr:hover {
+	background-color: #E8E8E8;
 }
 
 table.list-urls>tr>td:nth-child(1) {
@@ -331,18 +541,11 @@ footer {
 	left: 0;
 	right: 0;
 	bottom: 0;
-	padding: 10rem;
-	text-align: center;
-	background-color: white;
-	box-shadow: 0 0 5rem rgba(0,0,0,0.175);
+	padding: 5rem;
 }
 
 .msgbox {
 	display: block;
-	position: fixed;
-	left: 0;
-	right: 0;
-	bottom: 60rem;
 	line-height: 30rem;
 	max-width: 500rem;
 	margin: auto;
@@ -351,7 +554,7 @@ footer {
 	color: white;
 	opacity: 0.9;
 	cursor: pointer;
-	animation: fadein 0.2s;
+	animation: fadein90 0.2s;
 }
 
 .msgbox.success {
@@ -366,12 +569,11 @@ footer {
 	background-color: #DD2222;
 }
 
-@keyframes fadein {
-	from { opacity: 0; }
-	to { opacity: 0.9; }
-}
-
 /* -------------------- Icons -------------------- */
+
+.icon-hamburger::before {
+	content: "\2630";
+}
 
 .icon-help {
 	display: inline-block;
@@ -397,7 +599,7 @@ footer {
 	display: inline-block;
 	height: 15rem;
 	width: 15rem;
-	margin: 0 5rem 0 10rem;
+	margin: 0 5rem 0 5rem;
 	border-radius: 50%;
 	background-color: lightgray;
 }

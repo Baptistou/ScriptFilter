@@ -18,7 +18,7 @@ function PortConnect(){
 	
 //#	Public methods
 	//Adds a connected port
-	//args = {(mandatory) port, (optional) msgget, msgpost, disconnect}
+	//args = {(mandatory) port [object], (optional) msgget [function], msgpost [function], disconnect [function]}
 	this.connect = function(args){
 		var id = count++;
 		this.data.push({
@@ -35,23 +35,19 @@ function PortConnect(){
 	};
 	
 	//Sends message to specified ports
-	//args = {(mandatory) ports, (optional) tabid, msg} || ports
+	//args = {(mandatory) port [object|array], (optional) tabid [int], msg [object]} || ports [array]
 	this.send = function(args){
-		var portmatch = (args.ports && args.tabid)?
-			port => (args.ports.contains(port.name) && args.tabid==port.sender.tab.id):
-			(args.tabid)? port => (args.tabid==port.sender.tab.id):
-			(args.ports)? port => args.ports.contains(port.name):
-			port => args.contains(port.name);
-		this.data.removeAll(function(val){
+		var ports = [].concat(args.port || args);
+		this.data = this.data.filter(function(val){
 			try{
-				if(portmatch(val.port)){
+				if(ports.contains(val.port.name) && (!args.tabid || args.tabid==val.port.sender.tab.id)){
 					if(args.msg) val.port.postMessage(args.msg);
 					else if(val.msgpost) val.port.postMessage(val.msgpost());
 					else val.port.postMessage();}
-				return false;}
+				return true;}
 			catch(error){
 				if(val.disconnect) val.disconnect();
-				return true;}
+				return false;}
 		});
 	};
 }
@@ -59,7 +55,7 @@ function PortConnect(){
 /* -------------------- Functions -------------------- */
 
 //Opens a new tab
-//args = {(optional) url, windowId, index, active, pinned}
+//args = {(optional) url [string], windowId [int], index [int], active [bool], pinned [bool]}
 function opentab(args,callback){
 	switch(args && args.index){
 	case "next" :
@@ -84,7 +80,7 @@ function opentab(args,callback){
 }
 
 //Focuses specified tab
-//args = {(mandatory) id, windowId}
+//args = {(mandatory) id [int], windowId [int]}
 function focustab(args){
 	if(!ANDROID) browser.windows.update(args.windowId,{focused: true});
 	browser.tabs.update(args.id,{active: true});
@@ -92,7 +88,7 @@ function focustab(args){
 
 //Closes specified tab and its window
 //Note: about:config --> browser.tabs.closeWindowWithLastTab
-//args = {(mandatory) id, windowId}
+//args = {(mandatory) id [int], windowId [int]}
 function closetab(args){
 	if(!ANDROID)
 		browser.tabs.query({windowId: args.windowId},function(tabs){
@@ -102,24 +98,32 @@ function closetab(args){
 	else browser.tabs.remove(args.id);
 }
 
-//Merges all windows into one window
+//Merges other windows into current window
 //Note: No Firefox Android support
-//args = {(optional) windowId, index}
-function mergewindows(args){
-	var movetabs = ((tabs,winid,index) => browser.tabs.move(
-		tabs.filter(tab => (tab.windowId!=winid)).map(tab => tab.id),
-		{windowId: winid, index: (index==0 || index=="begin")? 0 : (!index || index=="end")? -1 : index}
-	));
-	browser.tabs.query({},function(tabs){
-		if(args && args.windowId!=undefined) browser.windows.get(args.windowId,win => movetabs(tabs,win.id,args.index));
-		else if(args && args.index=="next") browser.tabs.getCurrent(tab => movetabs(tabs,tab.windowId,tab.index));
-		else if(args && args.index!=undefined) browser.tabs.getCurrent(tab => movetabs(tabs,tab.windowId,args.index));
-		else browser.tabs.move(tabs.map(tab => tab.id),{windowId: browser.windows.WINDOW_ID_CURRENT, index: -1});
+//Note: Private and normal windows can't merge
+function mergewindows(){
+	browser.windows.getCurrent(function(current){
+		browser.tabs.query({},tabs => tabs.groupBy(tab => tab.incognito).forEach(function(group){
+			browser.tabs.move(
+				group.value.map(tab => tab.id),
+				{windowId: (current.incognito!=group.key)? group.value[0].windowId : current.id, index: -1}
+			);
+		}));
+	});
+}
+
+//Closes other windows
+//Note: No Firefox Android support
+function closewindows(){
+	browser.windows.getCurrent(function(current){
+		browser.windows.getAll(function(windows){
+			windows.filter(win => (win.id!=current.id)).forEach(win => browser.windows.remove(win.id));
+		});
 	});
 }
 
 //Gets i18n message from internationalized files
-//args = {(mandatory) msg, (optional) key} || msg
+//args = {(mandatory) msg [string], (optional) key [string]} || msg [string]
 function geti18ndata(args){
 	return browser.i18n.getMessage(
 		(args.key)? "@"+args.key:

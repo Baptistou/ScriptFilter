@@ -1,0 +1,95 @@
+/* -------------------- Colors -------------------- */
+
+body {
+	color: black;
+	background-color: white;
+}
+
+.link {
+	color: black;
+}
+
+.inputfield {
+	color: black;
+	border-color: #E8E8E8;
+	background-color: #E8E8E8;
+}
+
+.inputfield:hover, .inputfield:focus {
+	border-color: #AAAAAA;
+	background-color: #FFFFFF;
+}
+
+.inputfield:disabled, .inputfield[readonly] {
+	border-color: #E8E8E8;
+	background-color: #E8E8E8;
+}
+
+select.menu {
+	/* DEFAULT */
+}
+
+nav {
+	background-color: white;
+}
+
+nav .link {
+	color: #888888;
+}
+
+nav .link:hover {
+	background-color: #E8E8E8;
+}
+
+nav .link.active {
+	color: black;
+}
+
+nav .nav-button>button:hover {
+	background-color: #E8E8E8;
+}
+
+ul.list-actions {
+	background-color: white;
+}
+
+ul.list-actions button:hover {
+	background-color: #E8E8E8;
+}
+
+ul.list-actions button:disabled {
+	color: #888888;
+	background-color: white;
+}
+
+ul.slideshow {
+	background-color: white;
+}
+
+ul.list-options>li:hover {
+	background-color: #E8E8E8;
+}
+
+ul.list-options.fullwidth label:hover {
+	background-color: #E8E8E8;
+}
+
+table.list-urls {
+	border-color: #F0F0F0;
+}
+
+table.list-urls>tr {
+	border-color: #E0E0E0;
+}
+
+table.list-urls>tr:hover {
+	background-color: #E8E8E8;
+}
+
+.icon-help {
+	background-color: #CCCCCC;
+}
+
+.icon-help:hover {
+	background-color: #BBBBBB;
+}

@@ -1,4 +1,18 @@
-﻿# ScriptFilter 3.2 - CHANGELOG
+﻿# ScriptFilter 4.0 - CHANGELOG
+
+**version 4.0 (09/06/2018)**
+- Fix domain url matching issue with wildcard urls and non http urls.
+- Fix some minor issues.
+- Add new design in Settings page.
+- Add new features to action menu in Settings page.
+- Add information slideshow to "About" block in Settings page.
+- Add select menu to export blacklist as text file or CSV file.
+- Add light & dark themes.
+- Add user interface persistence.
+- Improve error message when file import fails.
+- Update some i18n translations.
+- Remove footer from Settings page.
+- Code and performance improvements.
 
 **version 3.2 (30/03/2018)**
 - Fix CSP All select issue in Settings page.
@@ -8,7 +22,7 @@
 **version 3.1 (25/03/2018)**
 - Fix CSP sandbox invalid option.
 - Fix error on file import when no file is selected.
-- Modify some i18n translations.
+- Update some i18n translations.
 - CSS responsive improvements for large screens.
 - Icon font improvements for Windows and Linux.
 - Code and performance improvements.
