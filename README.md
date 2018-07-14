@@ -1,4 +1,4 @@
-﻿# ScriptFilter 4.0
+﻿# ScriptFilter 4.1
 
 **Blocks scripts and resources from a website with Content Security Policy.**
 

@@ -107,8 +107,9 @@
 							<select class="menu" id="csp_all">
 								<option value="0" class="hidden" data-i18n>Custom</option>
 								<option value="1" data-i18n>Enable</option>
-								<option value="2" data-i18n>Restrict</option>
-								<option value="3" data-i18n>Disable</option>
+								<option value="2" data-i18n>Restrict External</option>
+								<option value="3" data-i18n>Restrict Unsafe</option>
+								<option value="4" data-i18n>Disable</option>
 							</select>
 						</li>
 						<li>
@@ -116,34 +117,19 @@
 							<label data-i18n>Images</label>
 							<select class="menu" id="csp_img">
 								<option value="1" data-i18n>Enable</option>
-								<option value="2" data-i18n>Restrict</option>
-								<option value="3" data-i18n>Disable</option>
+								<option value="2" data-i18n>Restrict External</option>
+								<option value="3" data-i18n>Restrict Unsafe</option>
+								<option value="4" data-i18n>Disable</option>
 							</select>
 						</li>
 						<li>
 							<span class="icon-circle"></span>
-							<label data-i18n="medias">Medias (Audio+Video)</label>
+							<label data-i18n="csp_media">Medias Audio/Video</label>
 							<select class="menu" id="csp_media">
 								<option value="1" data-i18n>Enable</option>
-								<option value="2" data-i18n>Restrict</option>
-								<option value="3" data-i18n>Disable</option>
-							</select>
-						</li>
-						<li>
-							<span class="icon-circle"></span>
-							<label data-i18n>Popups</label>
-							<select class="menu" id="csp_popup">
-								<option value="1" data-i18n>Enable</option>
-								<option value="3" data-i18n>Disable</option>
-							</select>
-						</li>
-						<li>
-							<span class="icon-circle"></span>
-							<label data-i18n>Scripts</label>
-							<select class="menu" id="csp_script">
-								<option value="1" data-i18n>Enable</option>
-								<option value="2" data-i18n>Restrict</option>
-								<option value="3" data-i18n>Disable</option>
+								<option value="2" data-i18n>Restrict External</option>
+								<option value="3" data-i18n>Restrict Unsafe</option>
+								<option value="4" data-i18n>Disable</option>
 							</select>
 						</li>
 						<li>
@@ -151,17 +137,37 @@
 							<label data-i18n>Stylesheets CSS</label>
 							<select class="menu" id="csp_style">
 								<option value="1" data-i18n>Enable</option>
-								<option value="2" data-i18n>Restrict</option>
-								<option value="3" data-i18n>Disable</option>
+								<option value="2" data-i18n>Restrict External</option>
+								<option value="3" data-i18n>Restrict Unsafe</option>
+								<option value="4" data-i18n>Disable</option>
 							</select>
 						</li>
 						<li>
 							<span class="icon-circle"></span>
-							<label data-i18n>Frames and objects</label>
+							<label data-i18n>Scripts</label>
+							<select class="menu" id="csp_script">
+								<option value="1" data-i18n>Enable</option>
+								<option value="2" data-i18n>Restrict External</option>
+								<option value="3" data-i18n>Restrict Unsafe</option>
+								<option value="4" data-i18n>Disable</option>
+							</select>
+						</li>
+						<li>
+							<span class="icon-circle"></span>
+							<label data-i18n>Popups</label>
+							<select class="menu" id="csp_popup">
+								<option value="1" data-i18n>Enable</option>
+								<option value="4" data-i18n>Disable</option>
+							</select>
+						</li>
+						<li>
+							<span class="icon-circle"></span>
+							<label data-i18n="csp_frame">Frames/Objects/Workers</label>
 							<select class="menu" id="csp_frame">
 								<option value="1" data-i18n>Enable</option>
-								<option value="2" data-i18n>Restrict</option>
-								<option value="3" data-i18n>Disable</option>
+								<option value="2" data-i18n>Restrict External</option>
+								<option value="3" data-i18n>Restrict Unsafe</option>
+								<option value="4" data-i18n>Disable</option>
 							</select>
 						</li>
 						<li>
@@ -169,14 +175,16 @@
 							<label data-i18n>Requests AJAX</label>
 							<select class="menu" id="csp_connect">
 								<option value="1" data-i18n>Enable</option>
-								<option value="2" data-i18n>Restrict</option>
-								<option value="3" data-i18n>Disable</option>
+								<option value="2" data-i18n>Restrict External</option>
+								<option value="3" data-i18n>Restrict Unsafe</option>
+								<option value="4" data-i18n>Disable</option>
 							</select>
 						</li>
 					</ul>
 					<p>
 						<i18n data="csp_enable">Enable : Resources are loaded as normal.</i18n><br>
-						<i18n data="csp_restrict">Restrict : External resources and unsafe inline resources are blocked.</i18n><br>
+						<i18n data="csp_restrict_external">Restrict External : External resources are blocked.</i18n><br>
+						<i18n data="csp_restrict_unsafe">Restrict Unsafe : External and unsafe/inline resources are blocked.</i18n><br>
 						<i18n data="csp_disable">Disable : All resources are blocked.</i18n>
 					</p>
 				</div>

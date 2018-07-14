@@ -3,7 +3,7 @@
 //Global constants
 const PORT_SETTINGS = "settings";
 const MODE_ALL=1, MODE_TAB=2, MODE_URL=3;
-const CSP_ENABLE=1, CSP_RESTRICT=2, CSP_DISABLE=3;
+const CSP_CUSTOM=0, CSP_ENABLE=1, CSP_RESTRICT_EXTERNAL=2, CSP_RESTRICT_UNSAFE=3, CSP_DISABLE=4;
 const THEME_LIGHT=1, THEME_DARK=2;
 const REG_DOMAINURL = /^[\.\*\?a-z0-9_-]+$/;
 const BROWSERACTION_TITLE = {true: "ScriptFilter (OFF)", false: "ScriptFilter (ON)"};
@@ -32,15 +32,15 @@ function CSPManager(){
 	var untrusts = [];
 	
 //#	Constructors
-	//Retrieves data from local storage and from sync storage if available
+	//Retrieves data from local storage
 	browser.storage.local.get(function(storage){
 		self.csp = storage.csp || {
-			all: 0,
+			all: CSP_CUSTOM,
 			img: CSP_ENABLE,
 			media: CSP_ENABLE,
-			popup: CSP_DISABLE,
-			script: CSP_DISABLE,
 			style: CSP_ENABLE,
+			script: CSP_DISABLE,
+			popup: CSP_DISABLE,
 			frame: CSP_DISABLE,
 			connect: CSP_DISABLE
 		};
@@ -73,12 +73,12 @@ function CSPManager(){
 		if(!this.csp.all)
 			return csptostr("img-src",this.csp.img)
 			+ csptostr("media-src",this.csp.media)
-			+ ((this.csp.popup!=CSP_ENABLE)? CSP_SANDBOX_NOPOPUPS : "")
-			+ csptostr("script-src",this.csp.script)
 			+ csptostr("style-src",this.csp.style)
-			+ csptostr("child-src",this.csp.frame)	//CSP 2-
-			+ csptostr("frame-src",this.csp.frame)	//CSP 1+
-			+ csptostr("worker-src",this.csp.frame)	//CSP 3+
+			+ csptostr("font-src",this.csp.style)
+			+ csptostr("script-src",this.csp.script)
+			+ ((this.csp.popup!=CSP_ENABLE)? CSP_SANDBOX_NOPOPUPS : "")
+			+ csptostr("frame-src",this.csp.frame)
+			+ csptostr("worker-src",this.csp.frame)
 			+ csptostr("object-src",this.csp.frame)
 			+ csptostr("connect-src",this.csp.connect);
 		else return csptostr("default-src",this.csp.all);
@@ -245,7 +245,8 @@ function CSPManager(){
 function csptostr(key,val){
 	switch(val){
 	case CSP_ENABLE : return "";
-	case CSP_RESTRICT : return key+" 'self';";
+	case CSP_RESTRICT_EXTERNAL : return key+" 'self' blob: data: 'unsafe-inline' 'unsafe-eval';";
+	case CSP_RESTRICT_UNSAFE : return key+" 'self';";
 	case CSP_DISABLE : return key+" 'none';";}
 }
 

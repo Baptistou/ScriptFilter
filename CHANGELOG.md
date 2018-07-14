@@ -1,4 +1,10 @@
-﻿# ScriptFilter 4.0 - CHANGELOG
+﻿# ScriptFilter 4.1 - CHANGELOG
+
+**version 4.1 (14/07/2018)**
+- Add CSP option to block third-party and allow unsafe inline resources.
+- Add CSP directive "font-src" with directive "style-src".
+- Update some i18n translations.
+- Remove deprecated CSP Level 2 directive "child-src".
 
 **version 4.0 (09/06/2018)**
 - Fix domain url matching issue with wildcard urls and non http urls.

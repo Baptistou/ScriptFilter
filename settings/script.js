@@ -1,12 +1,13 @@
 /* -------------------- PreProcess -------------------- */
 
 //Global constants
+const MANIFEST = browser.runtime.getManifest();
 const PORT_SETTINGS = "settings";
 const URL_THEME = {1: "/themes/light.css", 2: "/themes/dark.css"};
-const CSP_ENABLE=1, CSP_RESTRICT=2, CSP_DISABLE=3;
+const CSP_CUSTOM=0, CSP_ENABLE=1, CSP_RESTRICT_EXTERNAL=2, CSP_RESTRICT_UNSAFE=3, CSP_DISABLE=4;
 const REG_DOMAINURL = /^[\.\*\?a-z0-9_-]+$/;
-const CSP_RULES = ["all","img","media","popup","script","style","frame","connect"];
-const CSP_COLORS = ["","green","orange","red"];
+const CSP_RULES = ["all","img","media","style","script","popup","frame","connect"];
+const CSP_COLORS = ["","green","orange","orange","red"];
 const IMPORT_FILEACCEPT = [".txt",".csv","text/plain","text/csv"];
 const EXPORT_FILENAME = {1: "scriptfilter_export.txt", 2: "scriptfilter_export.csv"};
 const EXPORT_FILETYPE = {1: "text/plain", 2: "text/csv"};
@@ -175,8 +176,8 @@ function setcspvalue(key,value){
 	else{
 		var menu = document.getElementById("csp_all");
 		var circle = menu.parentElement.querySelector(".icon-circle");
-		menu.value = 0;
-		csp["all"] = 0;
+		menu.value = CSP_CUSTOM;
+		csp["all"] = CSP_CUSTOM;
 		csp[key] = value;
 		circle.className = "icon-circle";}
 }
@@ -278,10 +279,9 @@ window.onload = function(){
 	setactionmenu();
 	
 	//About
-	var manifest = browser.runtime.getManifest();
-	document.getElementById("version").textContent = manifest.version;
-	document.getElementById("author").textContent = manifest.author;
-	document.getElementById("description").textContent = manifest.description;
+	document.getElementById("version").textContent = MANIFEST["version"];
+	document.getElementById("author").textContent = MANIFEST["author"];
+	document.getElementById("description").textContent = MANIFEST["description"];
 	playslideshow();
 	
 	//Content Security Policy
