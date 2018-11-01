@@ -32,6 +32,6 @@ More info :
 - [Firefox Addon](https://addons.mozilla.org/firefox/addon/scriptfilteraddon)
 - [Chrome Addon](https://chrome.google.com/webstore/detail/ljmpgckeehellmpepbfikjbmeepdepfh)
 
-See also : [PopupFilter](https://github.com/Baptistou/PopupFilter)
+See also : [HTMLFilter](https://github.com/Baptistou/HTMLFilter), [PopupFilter](https://github.com/Baptistou/PopupFilter).
 
 *Designed by Baptiste Thémine*
