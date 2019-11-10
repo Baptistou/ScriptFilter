@@ -1,6 +1,6 @@
-﻿# ScriptFilter 4.1
+# ScriptFilter 4.1
 
-**Blocks scripts and resources from a website with Content Security Policy.**
+:uk: **Blocks scripts and resources from a website with Content Security Policy.**
 
 ScriptFilter is a simple and lightweight add-on designed with WebExtensions API and compatible with Firefox, Chrome and Opera.
 You just need to click on the add-on button or right-click in a page to block scripts in a tab.
@@ -11,7 +11,7 @@ It is also possible to create a black list in order to block resources when you 
 
 --------------------------------------------------------------------------------
 
-**Bloque les scripts et les ressources d'un site web avec Content Security Policy.**
+:fr: **Bloque les scripts et les ressources d'un site web avec Content Security Policy.**
 
 ScriptFilter est une extension simple et légère développée à l'aide de l'API WebExtensions et compatible avec les navigateurs Firefox, Chrome et Opera.
 Il vous suffit de cliquer sur le bouton de l'extension ou cliquer-droit dans la page pour bloquer les scripts dans un onglet.
